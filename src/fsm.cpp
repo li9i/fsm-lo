@@ -7,7 +7,8 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   nh_private_(nh_private),
   lock_(true),
   sc_(0),
-  initial_pose_{0,0,0}
+  initial_pose_{0.0,0.0,0.0},
+  current_pose_{0.0,0.0,0.0}
 {
   ROS_INFO("[FSM_LIDOM] Starting up");
 
@@ -35,7 +36,7 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 
   // fsm's pose estimate
   pose_estimate_pub_ =
-    nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_estimate_topic_, 1);
+    nh_.advertise<geometry_msgs::PoseStamped>(pose_estimate_topic_, 1);
 }
 
 
@@ -279,8 +280,31 @@ FSMLO::retypeScan(const sensor_msgs::LaserScan::Ptr& scan_msg)
 
 
 /*******************************************************************************
- *
 */
+geometry_msgs::PoseStamped
+FSMLO::retypePose(const std::tuple<double,double,double>& pose)
+{
+  geometry_msgs::PoseStamped pose_msg;
+  pose_msg.header.stamp = ros::Time::now();
+
+  // Set position
+  pose_msg.pose.position.x = std::get<0>(pose);
+  pose_msg.pose.position.y = std::get<1>(pose);
+  pose_msg.pose.position.z = 0.0;
+
+  // Set orientation
+  tf::Quaternion q;
+  q.setRPY(0.0, 0.0, std::get<2>(pose));
+  q.normalize();
+  tf::quaternionTFToMsg(q, pose_msg.pose.orientation);
+
+  return pose_msg;
+}
+
+
+/*******************************************************************************
+ *
+ */
 bool FSMLO::serviceStart(
   std_srvs::Empty::Request &req,
   std_srvs::Empty::Response &res)
@@ -292,7 +316,7 @@ bool FSMLO::serviceStart(
 
 /*******************************************************************************
  *
-*/
+ */
 bool FSMLO::serviceStop(
   std_srvs::Empty::Request &req,
   std_srvs::Empty::Response &res)
@@ -322,6 +346,9 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
     sv_ = FSM::DatasetUtils::interpolateRanges(sv_);
     sv_ = FSM::Utils::subsampleScan(sv_, SIZE_SCAN);
 
+    // Set current pose estimate
+    current_pose_ = initial_pose_;
+
     return;
   }
   else
@@ -336,27 +363,26 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
     sr_ = FSM::Utils::subsampleScan(sr_, SIZE_SCAN);
   }
 
-  std::tuple<double,double,double> zero_pose;
-  std::get<0>(zero_pose) = 0.0;
-  std::get<1>(zero_pose) = 0.0;
-  std::get<2>(zero_pose) = 0.0;
-
-  std::tuple<double,double,double> virtual_pose = zero_pose;
-  std::tuple<double,double,double> result_pose = zero_pose;
 
   // The reference scan in 2d points
   std::vector< std::pair<double,double> > vp;
-  FSM::Utils::scan2points(sv_, virtual_pose, &vp);
+  FSM::Utils::scan2points(sv_, current_pose_, &vp);
 
   FSM::output_params op;
+  std::tuple<double,double,double> result_pose;
 
   // Do your magic thing
-  FSM::Match::fmtdbh(sr_, virtual_pose, vp, "FMT", r2rp_, c2rp_, ip_, &op,
+  FSM::Match::fmtdbh(sr_, current_pose_, vp, "FMT", r2rp_, c2rp_, ip_, &op,
     &result_pose);
 
   // The new scan (at time t) becomes the old scan (at time t+1)
   sv_ = sr_;
 
+  // The pose estimate at time t becomes the old estimate at  time t+1
+  current_pose_ = result_pose;
+
+  // Publish the current pose estimate
+  pose_estimate_pub_.publish(retypePose(current_pose_));
 
   // Unlock
   lock_ = false;

@@ -87,6 +87,8 @@ class FSMLO
     // Scan counter
     unsigned int sc_;
 
+    // Current pose estimate
+    std::tuple<double,double,double> current_pose_;
 
     // The initial pose (optionally provided)
     std::tuple<double,double,double> initial_pose_;
@@ -96,9 +98,11 @@ class FSMLO
 
     // **** methods
 
-    void cacheFFTW3Plans(const unsigned int& sz);
+    void cacheFFTW3Plans(
+      const unsigned int& sz);
 
-    double extractYawFromPose(const geometry_msgs::Pose& pose);
+    double extractYawFromPose(
+      const geometry_msgs::Pose& pose);
 
     bool initialPoseService(
       std_srvs::Empty::Request &req,
@@ -106,7 +110,11 @@ class FSMLO
 
     void initParams();
 
-    std::vector<double> retypeScan(const sensor_msgs::LaserScan::Ptr& scan_msg);
+    std::vector<double> retypeScan(
+      const sensor_msgs::LaserScan::Ptr& scan_msg);
+
+    geometry_msgs::PoseStamped retypePose(
+      const std::tuple<double,double,double>& pose);
 
     bool serviceStart(
       std_srvs::Empty::Request &req,
@@ -115,7 +123,8 @@ class FSMLO
       std_srvs::Empty::Request &req,
       std_srvs::Empty::Response &res);
 
-    void scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg);
+    void scanCallback(
+      const sensor_msgs::LaserScan::Ptr& scan_msg);
 
 };
 
