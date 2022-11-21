@@ -1,0 +1,16 @@
+# Most basic parameters
+scan_topic: '/base_scan'
+size_scan: 360
+min_magnification_size: 0
+max_magnification_size: 3
+
+# Secondary parameters
+num_iterations: 2
+xy_bound: 0.2
+t_bound: 1.57
+sigma_noise_real: 0.2
+sigma_noise_map: 0.2
+max_counter: 200
+max_recoveries: 10
+enforce_terminal_constraint: 0
+enforce_early_gearup: 0
