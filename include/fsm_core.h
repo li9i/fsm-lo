@@ -53,14 +53,10 @@ struct input_params
   unsigned int num_iterations;
   double xy_bound;
   double t_bound;
-  double sigma_noise_real;
-  double sigma_noise_map;
   unsigned int max_counter;
   unsigned int min_magnification_size;
   unsigned int max_magnification_size;
   unsigned int max_recoveries;
-  bool enforce_terminal_constraint;
-  bool enforce_early_gearup;
 };
 
 struct output_params
@@ -3786,29 +3782,6 @@ class Match
         l2_recovery = true;
       }
 
-      // Impose strict measures when on the final straight
-      if (ip.enforce_terminal_constraint)
-      {
-        if (current_magnification_size >= max_magnification_size)
-        {
-          // Detect when stuck at awkward pose
-          // trans_criterion is a measure of the deviation between rays from the
-          // same pose; wherefore this should be proportionate to the
-          // square root of the sum of variance estimates of the laser's rays
-          // and the rays of the virtual scan
-          // (assuming they are distributed normally)
-          if (tc_v.back() > 2*sqrtf(ip.sigma_noise_real*ip.sigma_noise_real+
-              ip.sigma_noise_map*ip.sigma_noise_map)
-            + 0.001)
-          {
-#if defined (DEBUG)
-            printf("Will trigger recovery due to condition 3\n");
-#endif
-            l2_recovery = true;
-          }
-        }
-      }
-
       // Do not allow more than `max_counter` iterations per resolution
       if (counter > max_counter)
       {
@@ -3850,15 +3823,6 @@ class Match
         {
           current_magnification_size += 1;
           counter = 0;
-
-          if (ip.enforce_early_gearup)
-          {
-            if (rc0_v.back() > 0.99999 && up_lock == false)
-            {
-              current_magnification_size = max_magnification_size;
-              up_lock = true;
-            }
-          }
         }
       }
 

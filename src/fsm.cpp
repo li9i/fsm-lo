@@ -189,20 +189,6 @@ FSMLO::initParams()
   }
 
   // ---------------------------------------------------------------------------
-  if (!nh_private_.getParam ("sigma_noise_real", ip_.sigma_noise_real))
-  {
-    ROS_WARN("[FSM_LIDOM] no sigma_noise_real param found; resorting to defaults");
-    ip_.sigma_noise_real = 0.2;
-  }
-
-  // ---------------------------------------------------------------------------
-  if (!nh_private_.getParam ("sigma_noise_map", ip_.sigma_noise_map))
-  {
-    ROS_WARN("[FSM_LIDOM] no sigma_noise_map param found; resorting to defaults");
-    ip_.sigma_noise_map = 0.2;
-  }
-
-  // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("max_counter", int_param))
   {
     ROS_WARN("[FSM_LIDOM] no max_counter param found; resorting to defaults");
@@ -238,26 +224,10 @@ FSMLO::initParams()
   else
     ip_.max_recoveries = static_cast<unsigned int>(int_param);
 
-  // ---------------------------------------------------------------------------
-  if (!nh_private_.getParam ("enforce_terminal_constraint", ip_.enforce_terminal_constraint))
-  {
-    ROS_WARN("[FSM_LIDOM] no enforce_terminal_constraint param found; resorting to defaults");
-    ip_.enforce_terminal_constraint = false;
-  }
-
-  // ---------------------------------------------------------------------------
-  if (!nh_private_.getParam ("enforce_early_gearup", ip_.enforce_early_gearup))
-  {
-    ROS_WARN("[FSM_LIDOM] no enforce_early_gearup param found; resorting to defaults");
-    ip_.enforce_early_gearup = false;
-  }
-
   assert(SIZE_SCAN > 0);
   assert(ip_.num_iterations > 0);
   assert(ip_.xy_bound >= 0.0);
   assert(ip_.t_bound >= 0.0);
-  assert(ip_.sigma_noise_real >= 0.0);
-  assert(ip_.sigma_noise_map >= 0.0);
   assert(ip_.max_counter > 0);
   assert(ip_.min_magnification_size >= 0);
   assert(ip_.max_magnification_size >= ip_.min_magnification_size);
