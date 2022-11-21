@@ -5,7 +5,7 @@
 FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   nh_(nh),
   nh_private_(nh_private),
-  lock_(false),
+  lock_(true),
   sc_(0),
   initial_pose_{0,0,0}
 {
@@ -24,6 +24,14 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   // Initial pose setting service
   set_initial_pose_service_ = nh_.advertiseService(
     "fsm_lidom/set_initial_service", &FSMLO::initialPoseService, this);
+
+  // Start service
+  start_service_= nh_.advertiseService(
+    "fsm_lidom/start", &FSMLO::serviceStart, this);
+
+  // Stop service
+  stop_service_= nh_.advertiseService(
+    "fsm_lidom/stop", &FSMLO::serviceStop, this);
 
   // fsm's pose estimate
   pose_estimate_pub_ =
@@ -267,6 +275,30 @@ FSMLO::retypeScan(const sensor_msgs::LaserScan::Ptr& scan_msg)
     ret_vector.push_back(scan_msg->ranges[i]);
 
   return ret_vector;
+}
+
+
+/*******************************************************************************
+ *
+*/
+bool FSMLO::serviceStart(
+  std_srvs::Empty::Request &req,
+  std_srvs::Empty::Response &res)
+{
+  ROS_INFO("[FSM_LIDOM] Starting up...");
+  lock_ = false;
+}
+
+
+/*******************************************************************************
+ *
+*/
+bool FSMLO::serviceStop(
+  std_srvs::Empty::Request &req,
+  std_srvs::Empty::Response &res)
+{
+  ROS_INFO("[FSM_LIDOM] Shutting down...");
+  lock_ = true;
 }
 
 

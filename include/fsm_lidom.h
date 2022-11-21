@@ -38,6 +38,8 @@ class FSMLO
     ros::NodeHandle nh_;
     ros::NodeHandle nh_private_;
 
+
+
     // Scan topic subscriber
     ros::Subscriber scan_sub_;
 
@@ -46,6 +48,13 @@ class FSMLO
 
     // Initial pose setting service
     ros::ServiceServer set_initial_pose_service_;
+
+    // Starts lidar odometry
+    ros::ServiceServer start_service_;
+
+    // Stops lidar odometry
+    ros::ServiceServer stop_service_;
+
 
     // The topic where scans crash
     std::string scan_topic_;
@@ -98,6 +107,13 @@ class FSMLO
     void initParams();
 
     std::vector<double> retypeScan(const sensor_msgs::LaserScan::Ptr& scan_msg);
+
+    bool serviceStart(
+      std_srvs::Empty::Request &req,
+      std_srvs::Empty::Response &res);
+    bool serviceStop(
+      std_srvs::Empty::Request &req,
+      std_srvs::Empty::Response &res);
 
     void scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg);
 
