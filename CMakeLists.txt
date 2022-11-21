@@ -9,6 +9,7 @@ add_compile_options(-std=c++11 -Ofast)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
+  geometry_msgs
   message_generation
   CGAL
 )
@@ -17,6 +18,7 @@ catkin_package(
   CATKIN_DEPENDS
   roscpp
   sensor_msgs
+  geometry_msgs
   message_runtime
   INCLUDE_DIRS include
 )

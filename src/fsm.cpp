@@ -6,7 +6,8 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   nh_(nh),
   nh_private_(nh_private),
   lock_(false),
-  sc_(0)
+  sc_(0),
+  initial_pose_{0,0,0}
 {
   ROS_INFO("[FSM_LIDOM] Starting up");
 
@@ -16,8 +17,17 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   // cache fftw plans for efficiency of execution
   cacheFFTW3Plans(SIZE_SCAN);
 
-  //
-  scan_sub_ = nh_.subscribe(scan_topic_, 1, &FSMLO::scanCallback, this);
+  // The subscriber to the input scans topic
+  scan_sub_ =
+    nh_.subscribe(scan_topic_, 1, &FSMLO::scanCallback, this);
+
+  // Initial pose setting service
+  set_initial_pose_service_ = nh_.advertiseService(
+    "fsm_lidom/set_initial_service", &FSMLO::initialPoseService, this);
+
+  // fsm's pose estimate
+  pose_estimate_pub_ =
+    nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_estimate_topic_, 1);
 }
 
 
@@ -56,7 +66,61 @@ FSMLO::cacheFFTW3Plans(const unsigned int& sz)
 
 /*******************************************************************************
 */
-void
+double
+FSMLO::extractYawFromPose(const geometry_msgs::Pose& pose)
+{
+  tf::Quaternion q(
+    pose.orientation.x,
+    pose.orientation.y,
+    pose.orientation.z,
+    pose.orientation.w);
+
+  tf::Matrix3x3 mat(q);
+  double roll, pitch, yaw;
+  mat.getRPY(roll, pitch, yaw);
+
+  FSM::Utils::wrapAngle(&yaw);
+
+  return yaw;
+}
+
+
+/*******************************************************************************
+ * If there is an initial pose then set it
+*/
+bool FSMLO::initialPoseService(
+  std_srvs::Empty::Request &req,
+  std_srvs::Empty::Response &res)
+{
+  boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> pose_msg_shared;
+  geometry_msgs::PoseWithCovarianceStamped pose_msg;
+
+  // Take only one message from `initial_pose_topic_`
+  pose_msg_shared =
+    ros::topic::waitForMessage<geometry_msgs::PoseWithCovarianceStamped>(
+      initial_pose_topic_);
+
+  if (pose_msg_shared != NULL)
+  {
+    pose_msg = *pose_msg_shared;
+
+    std::get<0>(initial_pose_) = pose_msg.pose.pose.position.x;
+    std::get<1>(initial_pose_) = pose_msg.pose.pose.position.y;
+    std::get<2>(initial_pose_) = extractYawFromPose(pose_msg.pose.pose);
+
+    ROS_INFO("[FSM_LIDOM] Setting initial pose");
+    return true;
+  }
+  else
+  {
+    ROS_ERROR("[FSM_LIDOM] Failed to set initial pose");
+    return false;
+  }
+}
+
+/*******************************************************************************
+*/
+  void
 FSMLO::initParams()
 {
   // getParam does not recognise unsigned int
@@ -67,6 +131,20 @@ FSMLO::initParams()
   {
     ROS_WARN("[FSM_LIDOM] no scan_topic param found; resorting to defaults");
     scan_topic_ = "/base_scan";
+  }
+
+  // ---------------------------------------------------------------------------
+  if (!nh_private_.getParam ("initial_pose_topic", initial_pose_topic_))
+  {
+    ROS_WARN("[FSM_LIDOM] no initial_pose_topic param found; resorting to defaults");
+    initial_pose_topic_ = "/fsm_lidom/initial_pose";
+  }
+
+  // ---------------------------------------------------------------------------
+  if (!nh_private_.getParam ("pose_estimate_topic", pose_estimate_topic_))
+  {
+    ROS_WARN("[FSM_LIDOM] no pose_estimate_topic param found; resorting to defaults");
+    initial_pose_topic_ = "/fsm_lidom/pose_estimate";
   }
 
   // ---------------------------------------------------------------------------
@@ -180,7 +258,7 @@ FSMLO::initParams()
 
 /*******************************************************************************
 */
-std::vector<double>
+  std::vector<double>
 FSMLO::retypeScan(const sensor_msgs::LaserScan::Ptr& scan_msg)
 {
   std::vector<double> ret_vector;
@@ -194,7 +272,7 @@ FSMLO::retypeScan(const sensor_msgs::LaserScan::Ptr& scan_msg)
 
 /*******************************************************************************
 */
-void
+  void
 FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
 {
   if (lock_)

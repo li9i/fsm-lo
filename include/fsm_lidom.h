@@ -18,7 +18,10 @@
 #include <functional>
 
 #include <ros/ros.h>
+#include <tf/transform_datatypes.h>
 #include <sensor_msgs/LaserScan.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <std_srvs/Empty.h>
 #include "fsm_core.h"
 
 
@@ -35,6 +38,24 @@ class FSMLO
     ros::NodeHandle nh_;
     ros::NodeHandle nh_private_;
 
+    // Scan topic subscriber
+    ros::Subscriber scan_sub_;
+
+    // Pose estimate publisher
+    ros::Publisher pose_estimate_pub_;
+
+    // Initial pose setting service
+    ros::ServiceServer set_initial_pose_service_;
+
+    // The topic where scans crash
+    std::string scan_topic_;
+
+    // The topic where the initial pose may be provided (optional)
+    std::string initial_pose_topic_;
+
+    // The topic where fsm's pose estimate is published
+    std::string pose_estimate_topic_;
+
     // Params
     size_t SIZE_SCAN;
     FSM::input_params ip_;
@@ -48,9 +69,6 @@ class FSMLO
     // Locks callback execution
     bool lock_;
 
-    // Scan topic subscriber
-    ros::Subscriber scan_sub_;
-
     // Previous range scan
     std::vector<double> sv_;
 
@@ -60,8 +78,9 @@ class FSMLO
     // Scan counter
     unsigned int sc_;
 
-    // The topic where scans crash
-    std::string scan_topic_;
+
+    // The initial pose (optionally provided)
+    std::tuple<double,double,double> initial_pose_;
 
 
 
@@ -69,6 +88,12 @@ class FSMLO
     // **** methods
 
     void cacheFFTW3Plans(const unsigned int& sz);
+
+    double extractYawFromPose(const geometry_msgs::Pose& pose);
+
+    bool initialPoseService(
+      std_srvs::Empty::Request &req,
+      std_srvs::Empty::Response &res);
 
     void initParams();
 

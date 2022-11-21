@@ -1,5 +1,7 @@
 # Most basic parameters
 scan_topic: '/base_scan'
+initial_pose_topic: "/amcl_pose"
+pose_estimate_topic: "/fsm_lidom/pose_estimate"
 size_scan: 360
 min_magnification_size: 0
 max_magnification_size: 3
