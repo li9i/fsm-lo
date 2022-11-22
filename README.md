@@ -41,7 +41,6 @@ FSM parameters:
 
 ### Subscribed topics
 `scan_topic` (`sensor_msgs/LaserScan`)
-
 is where 2d panoramic scans are published
 
 `initial_pose_topic` (`geometry_msgs/PoseWithCovarianceStamped`)
@@ -58,7 +57,7 @@ is where the total estimated trajectory is published
 `fsm_lidar_ros/service_start` (`std_srvs/Empty`)
 commences node functionality
 `fsm_lidar_ros/service_stop` (`std_srvs/Empty`)
-halts node functionality (node remains alive) calling `/fsm_lidar_ros/service_start` revives it
+halts node functionality (node remains alive) calling `fsm_lidar_ros/service_start` revives it
 `fsm_lidom/set_initial_pose_service` (`std_srvs/Empty`)
 calling this service means: node subscribes to `initial_pose_topic`, obtains the latest pose estimate, sets fsm initial pose, and unsubribes
 
