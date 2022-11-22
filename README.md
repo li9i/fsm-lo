@@ -41,16 +41,17 @@ FSM parameters:
 
 ### Subscribed topics
 `scan_topic` (`sensor_msgs/LaserScan`)
-where 2d panoramic scans are published
+
+is where 2d panoramic scans are published
 
 `initial_pose_topic` (`geometry_msgs/PoseWithCovarianceStamped`)
-optional---for setting the very first pose estimate to values other than the origin
+optional---for setting the very first pose estimate to something other than the origin
 
 ### Published topics
 `pose_estimate_topic` (`geometry_msgs/PoseStamped`)
-where the current pose estimate is published
+is where the current pose estimate is published
 `path_estimate_topic` (`nav_msgs/Path`)
-where the total estimated trajectory is published
+is where the total estimated trajectory is published
 
 
 ### Services offered
