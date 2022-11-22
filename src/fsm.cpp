@@ -24,7 +24,7 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 
   // Initial pose setting service
   set_initial_pose_service_ = nh_.advertiseService(
-    "fsm_lidom/set_initial_service", &FSMLO::initialPoseService, this);
+    "fsm_lidom/set_initial_pose_service", &FSMLO::initialPoseService, this);
 
   // Start service
   start_service_= nh_.advertiseService(

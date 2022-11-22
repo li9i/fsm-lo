@@ -1,14 +1,14 @@
-# Essential parameters
+# Node parameters
 scan_topic: '/base_scan'
 initial_pose_topic: "/amcl_pose"
 pose_estimate_topic: "/fsm_lidom/pose_estimate"
 path_estimate_topic: "/fsm_lidom/path_estimate"
 size_scan: 360
+
+# FSM parameters
 min_magnification_size: 0
 max_magnification_size: 3
 num_iterations: 2
-
-# Secondary parameters
 xy_bound: 0.2
 t_bound: 0.786
 max_counter: 200
