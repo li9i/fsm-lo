@@ -23,42 +23,45 @@ $ catkin build fsm_lidom_ros
 ## `fsm_lidar_ros`
 
 ### Parameters
-Node parameters:
-`scan_topic`: 2d panoramic scans are published here
-`initial_pose_estimate`: (optional) the topic where an initial pose estimate may be provided
-`pose_estimate_topic`: `fsm_lidar_ros`'s pose estimates are published here
-`path_estimate_topic`: `fsm_lidar_ros`'s total trajectory estimate is published here
+Node parameters:\
+`scan_topic`: 2d panoramic scans are published here\
+`initial_pose_estimate`: (optional) the topic where an initial pose estimate may be provided\
+`pose_estimate_topic`: `fsm_lidar_ros`'s pose estimates are published here\
+`path_estimate_topic`: `fsm_lidar_ros`'s total trajectory estimate is published here\
 `scan_size`: for resizing the input scans' size (execution time is proportional to scan size)
 
-FSM parameters:
-`min_magnification_size`: base angular oversampling
-`max_magnification_size`: maximum angular oversampling
-`num_iterations`: Greater sensor velocity requires higher values
-`xy_bound`: Axiswise radius for randomly generating new initial position estimates in case of recovery
-`t_bound`: Angularwise radius for randomly generating new initial orientation estimates in case of recovery
-`max_counter`: Lower values decrease execution time
+FSM parameters:\
+`min_magnification_size`: base angular oversampling\
+`max_magnification_size`: maximum angular oversampling\
+`num_iterations`: Greater sensor velocity requires higher values\
+`xy_bound`: Axiswise radius for randomly generating new initial position estimates in case of recovery\
+`t_bound`: Angularwise radius for randomly generating new initial orientation estimates in case of recovery\
+`max_counter`: Lower values decrease execution time\
 `max_recoveries`: Ditto
 
 ### Subscribed topics
-`scan_topic` (`sensor_msgs/LaserScan`)
+`scan_topic` (`sensor_msgs/LaserScan`)\
 is where 2d panoramic scans are published
 
-`initial_pose_topic` (`geometry_msgs/PoseWithCovarianceStamped`)
+`initial_pose_topic` (`geometry_msgs/PoseWithCovarianceStamped`)\
 optional---for setting the very first pose estimate to something other than the origin
 
 ### Published topics
-`pose_estimate_topic` (`geometry_msgs/PoseStamped`)
+`pose_estimate_topic` (`geometry_msgs/PoseStamped`)\
 is where the current pose estimate is published
-`path_estimate_topic` (`nav_msgs/Path`)
+
+`path_estimate_topic` (`nav_msgs/Path`)\
 is where the total estimated trajectory is published
 
 
 ### Services offered
-`fsm_lidar_ros/service_start` (`std_srvs/Empty`)
+`fsm_lidar_ros/service_start` (`std_srvs/Empty`)\
 commences node functionality
-`fsm_lidar_ros/service_stop` (`std_srvs/Empty`)
+
+`fsm_lidar_ros/service_stop` (`std_srvs/Empty`)\
 halts node functionality (node remains alive) calling `fsm_lidar_ros/service_start` revives it
-`fsm_lidom/set_initial_pose_service` (`std_srvs/Empty`)
+
+`fsm_lidom/set_initial_pose_service` (`std_srvs/Empty`)\
 calling this service means: node subscribes to `initial_pose_topic`, obtains the latest pose estimate, sets fsm initial pose, and unsubribes
 
 
