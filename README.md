@@ -39,18 +39,18 @@ Found in `config/params.yaml`:
 | `min_magnification_size` | base angular oversampling                                                                        |
 | `max_magnification_size` | maximum angular oversampling                                                                     |
 | `num_iterations`         | Greater sensor velocity requires higher values                                                   |
-| `xy_bound`               | Axiswise radius for randomly generating new initial position estimates in case of recovery       |
-| `t_bound`                | Angularwise radius for randomly generating new initial orientation estimates in case of recovery |
+| `xy_bound`               | Axiswise radius for randomly generating a new initial position estimate in case of recovery       |
+| `t_bound`                | Angularwise radius for randomly generating a new initial orientation estimate in case of recovery |
 | `max_counter`            | Lower values decrease execution time                                                             |
 | `max_recoveries`         | Ditto                                                                                            |
 
 
 ### Subscribed topics
-`scan_topic` (`sensor_msgs/LaserScan`)\
-is where 2d panoramic scans are published
 
-`initial_pose_topic` (`geometry_msgs/PoseWithCovarianceStamped`)\
-optional---for setting the very first pose estimate to something other than the origin
+| Topic                | Type                                     |                                                                                        |
+| -------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------|
+| `scan_topic`         | `sensor_msgs/LaserScan`                  | 2d panoramic scans are published here                                                  |
+| `initial_pose_topic` | `geometry_msgs/PoseWithCovarianceStamped`| optional---for setting the very first pose estimate to something other than the origin |
 
 ### Published topics
 `pose_estimate_topic` (`geometry_msgs/PoseStamped`)\
