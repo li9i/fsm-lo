@@ -3496,7 +3496,6 @@ class Match
     const std::vector< double >& real_scan,
     const std::tuple<double,double,double>& virtual_pose,
     const std::vector< std::pair<double,double> >& map,
-    const std::string& match_method,
     const fftw_plan& r2rp, const fftw_plan& c2rp,
     const input_params& ip, output_params* op,
     std::tuple<double,double,double>* result_pose)
@@ -3561,15 +3560,9 @@ class Match
       std::vector<double> rc1;
       std::vector<double> dts;
 
-      if (match_method.compare("FSM") == 0)
-        dts = Rotation::fmt(real_scan, *result_pose, map,
-          current_magnification_size, "batch", r2rp, c2rp,
-          &rc0, &rc1, &intersections_time);
-
-      if (match_method.compare("DBH") == 0)
-        dts = Rotation::dbh(real_scan, *result_pose, map,
-          current_magnification_size, "batch", r2rp, c2rp,
-          &rc0, &rc1, &intersections_time);
+      dts = Rotation::fmt(real_scan, *result_pose, map,
+        current_magnification_size, "batch", r2rp, c2rp,
+        &rc0, &rc1, &intersections_time);
 
       unsigned int max_rc0_idx = std::max_element(rc0.begin(), rc0.end())
         - rc0.begin();
@@ -3624,10 +3617,9 @@ class Match
         std::chrono::high_resolution_clock::now();
 #endif
 
-      if (match_method.compare("FSM") == 0)
-        cand_angles = Rotation::fmt(real_scan, *result_pose, map,
-          current_magnification_size, "batch", r2rp, c2rp,
-          &rc0, &rc1, &intersections_time);
+      cand_angles = Rotation::fmt(real_scan, *result_pose, map,
+        current_magnification_size, "batch", r2rp, c2rp,
+        &rc0, &rc1, &intersections_time);
 
 #if (defined TIMES) || (defined LOGS)
       std::chrono::high_resolution_clock::time_point end_rotation =

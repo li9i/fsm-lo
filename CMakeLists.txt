@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   geometry_msgs
+  nav_msgs
   message_generation
   CGAL
 )
@@ -19,6 +20,7 @@ catkin_package(
   roscpp
   sensor_msgs
   geometry_msgs
+  nav_msgs
   message_runtime
   INCLUDE_DIRS include
 )

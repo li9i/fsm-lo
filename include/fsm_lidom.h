@@ -21,6 +21,7 @@
 #include <tf/transform_datatypes.h>
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <nav_msgs/Path.h>
 #include <std_srvs/Empty.h>
 #include "fsm_core.h"
 
@@ -46,6 +47,9 @@ class FSMLO
     // Pose estimate publisher
     ros::Publisher pose_estimate_pub_;
 
+    // Path estimate publisher
+    ros::Publisher path_estimate_pub_;
+
     // Initial pose setting service
     ros::ServiceServer set_initial_pose_service_;
 
@@ -64,6 +68,10 @@ class FSMLO
 
     // The topic where fsm's pose estimate is published
     std::string pose_estimate_topic_;
+
+    // The topic where fsm's path estimate is published
+    std::string path_estimate_topic_;
+
 
     // Params
     size_t SIZE_SCAN;
@@ -94,6 +102,8 @@ class FSMLO
     std::tuple<double,double,double> initial_pose_;
 
 
+    // The path estimate
+    std::vector< std::tuple<double,double,double> > path_estimate_;
 
 
     // **** methods

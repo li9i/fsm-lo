@@ -37,6 +37,10 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   // fsm's pose estimate
   pose_estimate_pub_ =
     nh_.advertise<geometry_msgs::PoseStamped>(pose_estimate_topic_, 1);
+
+  // fsm's path estimate
+  path_estimate_pub_ =
+    nh_.advertise<nav_msgs::Path>(path_estimate_topic_, 1);
 }
 
 
@@ -157,6 +161,13 @@ FSMLO::initParams()
   }
 
   // ---------------------------------------------------------------------------
+  if (!nh_private_.getParam ("path_estimate_topic", path_estimate_topic_))
+  {
+    ROS_WARN("[FSM_LIDOM] no path_estimate_topic param found; resorting to defaults");
+    path_estimate_topic_ = "/fsm_lidom/path_estimate";
+  }
+
+  // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("size_scan", int_param))
   {
     ROS_WARN("[FSM_LIDOM] no size_scan param found; resorting to defaults");
@@ -256,6 +267,7 @@ FSMLO::retypePose(const std::tuple<double,double,double>& pose)
 {
   geometry_msgs::PoseStamped pose_msg;
   pose_msg.header.stamp = ros::Time::now();
+  pose_msg.header.frame_id = "/map";
 
   // Set position
   pose_msg.pose.position.x = std::get<0>(pose);
@@ -318,6 +330,10 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
 
     // Set current pose estimate
     current_pose_ = initial_pose_;
+    path_estimate_.push_back(current_pose_);
+
+    // Publish the current pose estimate
+    pose_estimate_pub_.publish(retypePose(current_pose_));
 
     return;
   }
@@ -341,18 +357,31 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
   FSM::output_params op;
   std::tuple<double,double,double> result_pose;
 
+  // ---------------------------------------------------------------------------
   // Do your magic thing
-  FSM::Match::fmtdbh(sr_, current_pose_, vp, "FMT", r2rp_, c2rp_, ip_, &op,
+  FSM::Match::fmtdbh(sr_, current_pose_, vp, r2rp_, c2rp_, ip_, &op,
     &result_pose);
+  ROS_INFO("[FSM_LIDOM] FSM executed in %f sec\n", op.exec_time);
+  // ---------------------------------------------------------------------------
 
   // The new scan (at time t) becomes the old scan (at time t+1)
   sv_ = sr_;
 
   // The pose estimate at time t becomes the old estimate at  time t+1
   current_pose_ = result_pose;
+  path_estimate_.push_back(current_pose_);
 
   // Publish the current pose estimate
   pose_estimate_pub_.publish(retypePose(current_pose_));
+
+  // Publish the whole path estimate
+  nav_msgs::Path path;
+  path.header.stamp = ros::Time::now();
+  path.header.frame_id = "/map";
+  for (auto p(0); p < path_estimate_.size(); p++)
+    path.poses.push_back(retypePose(path_estimate_[p]));
+
+  path_estimate_pub_.publish(path);
 
   // Unlock
   lock_ = false;
