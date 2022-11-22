@@ -23,21 +23,27 @@ $ catkin build fsm_lidom_ros
 ## `fsm_lidar_ros`
 
 ### Parameters
-Node parameters:\
-`scan_topic`: 2d panoramic scans are published here\
-`initial_pose_estimate`: (optional) the topic where an initial pose estimate may be provided\
-`pose_estimate_topic`: `fsm_lidar_ros`'s pose estimates are published here\
-`path_estimate_topic`: `fsm_lidar_ros`'s total trajectory estimate is published here\
-`scan_size`: for resizing the input scans' size (execution time is proportional to scan size)
 
-FSM parameters:\
-`min_magnification_size`: base angular oversampling\
-`max_magnification_size`: maximum angular oversampling\
-`num_iterations`: Greater sensor velocity requires higher values\
-`xy_bound`: Axiswise radius for randomly generating new initial position estimates in case of recovery\
-`t_bound`: Angularwise radius for randomly generating new initial orientation estimates in case of recovery\
-`max_counter`: Lower values decrease execution time\
-`max_recoveries`: Ditto
+Found in `config/params.yaml`:
+
+| Node-specific parameters | What is this?                                                                    |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| `scan_topic`             | 2d panoramic scans are published here                                            |
+| `initial_pose_estimate`  | (optional) the topic where an initial pose estimate may be provided              |
+| `pose_estimate_topic`    | `fsm_lidar_ros`'s pose estimates are published here                              |
+| `path_estimate_topic`    | `fsm_lidar_ros`'s total trajectory estimate is published here                    |
+| `scan_size`              | for resizing the input scans' size (execution time is proportional to scan size) |
+
+| FSM-specific parameters  | And this?                                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `min_magnification_size` | base angular oversampling                                                                        |
+| `max_magnification_size` | maximum angular oversampling                                                                     |
+| `num_iterations`         | Greater sensor velocity requires higher values                                                   |
+| `xy_bound`               | Axiswise radius for randomly generating new initial position estimates in case of recovery       |
+| `t_bound`                | Angularwise radius for randomly generating new initial orientation estimates in case of recovery |
+| `max_counter`            | Lower values decrease execution time                                                             |
+| `max_recoveries`         | Ditto                                                                                            |
+
 
 ### Subscribed topics
 `scan_topic` (`sensor_msgs/LaserScan`)\
