@@ -44,6 +44,8 @@ Found in `config/params.yaml`:
 | `max_counter`            | Lower values decrease execution time                                                              |
 | `max_recoveries`         | Ditto                                                                                             |
 
+---
+
 
 ### Subscribed topics
 
@@ -52,6 +54,8 @@ Found in `config/params.yaml`:
 | `scan_topic`         | `sensor_msgs/LaserScan`                  | 2d panoramic scans are published here                                                  |
 | `initial_pose_topic` | `geometry_msgs/PoseWithCovarianceStamped`| optional---for setting the very first pose estimate to something other than the origin |
 
+---
+
 ### Published topics
 
 | Topic                 | Type                        | Utility                                          |
@@ -59,6 +63,7 @@ Found in `config/params.yaml`:
 | `pose_estimate_topic` | `geometry_msgs/PoseStamped` | the current pose estimate is published here      |
 | `path_estimate_topic` | `nav_msgs/Path`             | the total estimated trajectory is published here |
 
+---
 
 ### Services offered
 
@@ -68,7 +73,7 @@ Found in `config/params.yaml`:
 | `fsm_lidom/service_stop`             | `std_srvs/Empty` | halts node functionality (node remains alive)                                                                                                    |
 | `fsm_lidom/set_initial_pose_service` | `std_srvs/Empty` | calling this service means: node subscribes to `initial_pose_topic`, obtains the latest pose estimate, sets fsm's initial pose, and unsubscribes |
 
-
+---
 
 ## Motivation and Under the hood
 
