@@ -4,12 +4,32 @@ Functionally `fsm_lidom_ros` assumes a 2D LIDAR sensor with a field of view of
 360 degrees and executing it while the sensor is on the move will output an estimate
 of its trajectory.
 
-## Dependencies
+
+## Installation
+
+### Via Docker
+
+```
+docker pull li9i/fsm_lidom_ros
+
+docker run -it \
+    --name=fsm_lidom_ros_container \
+    --env="DISPLAY=$DISPLAY" \
+    --net=host \
+    --rm \
+    li9i/fsm_lidom_ros:latest
+```
+
+### Via the traditional method
+
+Tested in Ubuntu 16.04 and ROS kinetic
+
+#### Dependencies
 `CGAL 4.7`
 `FFTW3`
 `boost/random`
 
-## Building
+#### Building
 
 As always
 ```
@@ -18,17 +38,17 @@ git clone git@github.com:li9i/fsm_lidom_ros.git
 catkin build fsm_lidom_ros
 ```
 
-## Executing
+#### Executing
 
 ```
 roslaunch fsm_lidom_ros avanti_fsm_lidom.launch
 ```
 
-# Nodes
+## Nodes
 
-## `fsm_lidom_node`
+### `fsm_lidom_node`
 
-### Parameters
+#### Parameters
 
 Found in `config/params.yaml`:
 
@@ -53,7 +73,7 @@ Found in `config/params.yaml`:
 ---
 
 
-### Subscribed topics
+#### Subscribed topics
 
 | Topic                | Type                                     | Utility                                                                                |
 | -------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------|
@@ -62,7 +82,7 @@ Found in `config/params.yaml`:
 
 ---
 
-### Published topics
+#### Published topics
 
 | Topic                 | Type                        | Utility                                          |
 | --------------------- | ----------------------------| ------------------------------------------------ |
@@ -71,7 +91,7 @@ Found in `config/params.yaml`:
 
 ---
 
-### Services offered
+#### Services offered
 
 | Service                              | Type             | Utility                                                                                                                                          |
 | ------------------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
