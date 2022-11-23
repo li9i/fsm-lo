@@ -28,7 +28,6 @@ git clone git@github.com:li9i/fsm_lidom_ros.git
 cd fsm_lidom_ros/docker
 ./build_fsm_lidom_image.sh
 ./run_fsm_lidom_container.sh
-
 ```
 
 ### Via the traditional method
