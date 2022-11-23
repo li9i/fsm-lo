@@ -28,10 +28,10 @@ Tested in Ubuntu 16.04 and ROS kinetic
 
 #### Building
 
-As always
 ```
 cd ~/catkin_ws/src
 git clone git@github.com:li9i/fsm_lidom_ros.git
+cd ~/catkin_ws
 catkin build fsm_lidom_ros
 ```
 
