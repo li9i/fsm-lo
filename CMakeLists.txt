@@ -4,7 +4,7 @@ project(fsm_lidom_ros)
 SET(CMAKE_CXX_COMPILER /usr/bin/g++)
 add_compile_options(-std=c++11 -Ofast)
 
-#find_package(CGAL REQUIRED)
+find_package(CGAL REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -12,7 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   nav_msgs
   message_generation
-  CGAL
 )
 
 catkin_package(

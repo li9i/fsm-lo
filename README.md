@@ -1,7 +1,7 @@
 # ROS wrapper (cpp) for the Fourier Scan Matcher ([FSM](https://github.com/li9i/fsm)) in the guise of lidar odometry.
 
 Functionally `fsm_lidom_ros` assumes a 2D LIDAR sensor with a field of view of
-360 deg and executing it while the sensor is on the move will output an estimate
+360 degrees and executing it while the sensor is on the move will output an estimate
 of its trajectory.
 
 ## Dependencies
@@ -13,14 +13,20 @@ of its trajectory.
 
 As always
 ```
-$ cd ~/catkin_ws/src
-$ git clone git@github.com:li9i/fsm_lidom_ros.git
-$ catkin build fsm_lidom_ros
+cd ~/catkin_ws/src
+git clone git@github.com:li9i/fsm_lidom_ros.git
+catkin build fsm_lidom_ros
+```
+
+## Executing
+
+```
+roslaunch fsm_lidom_ros avanti_fsm_lidom.launch
 ```
 
 # Nodes
 
-## `fsm_lidar_ros`
+## `fsm_lidom_node`
 
 ### Parameters
 
