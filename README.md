@@ -24,10 +24,7 @@ docker run -it \
 
 Tested in Ubuntu 16.04 and ROS kinetic
 
-#### Dependencies
-`CGAL 4.7`
-`FFTW3`
-`boost/random`
+#### Dependencies: `CGAL 4.7` `FFTW3` `boost/random`
 
 #### Building
 
