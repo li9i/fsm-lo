@@ -479,7 +479,8 @@ class Utils
   */
   static Eigen::Matrix3d
   computeTransform(const std::tuple<double,double,double>& d,
-    const Eigen::Matrix3d& M)
+    const Eigen::Matrix3d& M,
+    std::tuple<double,double,double>* result_pose)
   {
     double dx = std::get<0>(d);
     double dy = std::get<1>(d);
@@ -502,6 +503,10 @@ class Utils
     // Compute the new transform matrix
     Eigen::Matrix3d M_;
     M_ = M * T * R;
+
+    std::get<0>(*result_pose) = M_(0,2);
+    std::get<1>(*result_pose) = M_(1,2);
+    std::get<2>(*result_pose) = atan2(M_(1,0), M_(0,0));
 
     return M_;
   }

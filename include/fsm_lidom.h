@@ -104,7 +104,7 @@ class FSMLO
     // The origin (0,0,0)
     std::tuple<double,double,double> origin;
 
-    // The initial pose (optionally provided)
+    // initial pose
     std::tuple<double,double,double> initial_pose_;
 
     // The transform
@@ -128,7 +128,7 @@ class FSMLO
 
     void initParams();
 
-    void publishResults(const std::tuple<double,double,double>& pose);
+    void publishResults();
 
     std::vector<double> retypeScan(
       const sensor_msgs::LaserScan::Ptr& scan_msg);

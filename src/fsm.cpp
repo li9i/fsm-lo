@@ -7,8 +7,8 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   nh_private_(nh_private),
   lock_(true),
   sc_(0),
-  initial_pose_{0.0,0.0,0.0},
   origin{0.0,0.0,0.0},
+  initial_pose_{0.0,0.0,0.0},
   M(Eigen::Matrix3d::Identity()),
   path_estimate_msg_(nav_msgs::Path())
 {
@@ -239,10 +239,10 @@ FSMLO::initParams()
 /*******************************************************************************
 */
 void
-FSMLO::publishResults(const std::tuple<double,double,double>& pose)
+FSMLO::publishResults()
 {
   // Construct pose estimate message and publish it
-  geometry_msgs::PoseStamped pose_msg = retypePose(pose);
+  geometry_msgs::PoseStamped pose_msg = retypePose(path_estimate_.back());
   pose_estimate_pub_.publish(pose_msg);
 
   // Constrict trajectory estimate message and publish it
@@ -427,23 +427,21 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
   // ---------------------------------------------------------------------------
 
   // Compute transform
-  M = FSM::Utils::computeTransform(diffs, M);
-
   std::tuple<double,double,double> result_pose;
-  std::get<0>(result_pose) = M(0,2);
-  std::get<1>(result_pose) = M(1,2);
-  std::get<2>(result_pose) = atan2(M(1,0), M(0,0));
+  M = FSM::Utils::computeTransform(diffs, M, &result_pose);
 
-  printf("%f,%f,%f\n", std::get<0>(result_pose),
-    std::get<1>(result_pose),
-    std::get<2>(result_pose));
 
+  // Update result pose by initial pose
+  std::get<0>(result_pose) += std::get<0>(initial_pose_);
+  std::get<1>(result_pose) += std::get<1>(initial_pose_);
+  std::get<2>(result_pose) += std::get<2>(initial_pose_);
+  FSM::Utils::wrapAngle(&std::get<2>(result_pose));
 
   // Append resulting pose to the estimated trajectory
   path_estimate_.push_back(result_pose);
 
   // Publish `result_pose` and `path_estimate_`
-  publishResults(result_pose);
+  publishResults();
 
   // The new scan (at time t) becomes the old scan (at time t+1)
   sv_ = sr_;
