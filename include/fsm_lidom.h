@@ -39,6 +39,8 @@ class FSMLO
     ros::NodeHandle nh_;
     ros::NodeHandle nh_private_;
 
+    // Name of this package
+    std::string PKG_NAME;
 
 
     // Scan topic subscriber
@@ -105,9 +107,11 @@ class FSMLO
     // The initial pose (optionally provided)
     std::tuple<double,double,double> initial_pose_;
 
-
     // The path estimate
     std::vector< std::tuple<double,double,double> > path_estimate_;
+
+    // The path estimate
+    nav_msgs::Path path_estimate_msg_;
 
 
     // **** methods
@@ -120,6 +124,8 @@ class FSMLO
 
 
     void initParams();
+
+    void publishResults(const std::tuple<double,double,double>& pose);
 
     std::vector<double> retypeScan(
       const sensor_msgs::LaserScan::Ptr& scan_msg);

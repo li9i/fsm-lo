@@ -8,9 +8,10 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   lock_(true),
   sc_(0),
   initial_pose_{0.0,0.0,0.0},
-  current_pose_{0.0,0.0,0.0}
+  current_pose_{0.0,0.0,0.0},
+  path_estimate_msg_(nav_msgs::Path())
 {
-  ROS_INFO("[FSM_LIDOM] Starting up");
+  ROS_INFO("[FSM_LIDOM] Init-ing...");
 
   // init params
   initParams();
@@ -45,6 +46,8 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   // fsm's path estimate
   path_estimate_pub_ =
     nh_.advertise<nav_msgs::Path>(path_estimate_topic_, 1);
+
+  ROS_INFO("[%s] Init-ed.", PKG_NAME.c_str());
 }
 
 
@@ -52,7 +55,7 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 */
 FSMLO::~FSMLO()
 {
-  printf("[FSMLO] Destroying FSMLO\n");
+  printf("[%s] Destroying FSMLO\n", PKG_NAME.c_str());
 }
 
 
@@ -111,37 +114,45 @@ FSMLO::initParams()
   int int_param;
 
   // ---------------------------------------------------------------------------
+  nh_private_.param<std::string>("pkg_name", PKG_NAME, "FSM_LIDOM");
+
+  // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("scan_topic", scan_topic_))
   {
-    ROS_WARN("[FSM_LIDOM] no scan_topic param found; resorting to defaults");
+    ROS_WARN("[%s] no scan_topic param found; resorting to defaults",
+      PKG_NAME.c_str());
     scan_topic_ = "/base_scan";
   }
 
   // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("initial_pose_topic", initial_pose_topic_))
   {
-    ROS_WARN("[FSM_LIDOM] no initial_pose_topic param found; resorting to defaults");
+    ROS_WARN("[%s] no initial_pose_topic param found; resorting to defaults",
+      PKG_NAME.c_str());
     initial_pose_topic_ = "/fsm_lidom/initial_pose";
   }
 
   // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("pose_estimate_topic", pose_estimate_topic_))
   {
-    ROS_WARN("[FSM_LIDOM] no pose_estimate_topic param found; resorting to defaults");
+    ROS_WARN("[%s] no pose_estimate_topic param found; resorting to defaults",
+      PKG_NAME.c_str());
     initial_pose_topic_ = "/fsm_lidom/pose_estimate";
   }
 
   // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("path_estimate_topic", path_estimate_topic_))
   {
-    ROS_WARN("[FSM_LIDOM] no path_estimate_topic param found; resorting to defaults");
+    ROS_WARN("[%s] no path_estimate_topic param found; resorting to defaults",
+      PKG_NAME.c_str());
     path_estimate_topic_ = "/fsm_lidom/path_estimate";
   }
 
   // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("size_scan", int_param))
   {
-    ROS_WARN("[FSM_LIDOM] no size_scan param found; resorting to defaults");
+    ROS_WARN("[%s] no size_scan param found; resorting to defaults",
+      PKG_NAME.c_str());
     SIZE_SCAN = 360;
   }
   else
@@ -150,8 +161,9 @@ FSMLO::initParams()
   // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("num_iterations", int_param))
   {
-    ROS_WARN("[FSM_LIDOM] no num_iterations param found; resorting to defaults");
-    ip_.num_iterations = 5;
+    ROS_WARN("[%s] no num_iterations param found; resorting to defaults",
+      PKG_NAME.c_str());
+    ip_.num_iterations = 2;
   }
   else
     ip_.num_iterations = static_cast<unsigned int>(int_param);
@@ -159,21 +171,24 @@ FSMLO::initParams()
   // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("xy_bound", ip_.xy_bound))
   {
-    ROS_WARN("[FSM_LIDOM] no xy_bound param found; resorting to defaults");
+    ROS_WARN("[%s] no xy_bound param found; resorting to defaults",
+      PKG_NAME.c_str());
     ip_.xy_bound = 0.2;
   }
 
   // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("t_bound", ip_.t_bound))
   {
-    ROS_WARN("[FSM_LIDOM] no t_bound param found; resorting to defaults");
+    ROS_WARN("[%s] no t_bound param found; resorting to defaults",
+      PKG_NAME.c_str());
     ip_.t_bound = M_PI/2;
   }
 
   // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("max_counter", int_param))
   {
-    ROS_WARN("[FSM_LIDOM] no max_counter param found; resorting to defaults");
+    ROS_WARN("[%s] no max_counter param found; resorting to defaults",
+      PKG_NAME.c_str());
     ip_.max_counter = 200;
   }
   else
@@ -182,7 +197,8 @@ FSMLO::initParams()
   // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("min_magnification_size", int_param))
   {
-    ROS_WARN("[FSM_LIDOM] no min_magnification_size param found; resorting to defaults");
+    ROS_WARN("[%s] no min_magnification_size param found; resorting to defaults",
+      PKG_NAME.c_str());
     ip_.min_magnification_size = 0;
   }
   else
@@ -191,7 +207,8 @@ FSMLO::initParams()
   // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("max_magnification_size", int_param))
   {
-    ROS_WARN("[FSM_LIDOM] no max_magnification_size param found; resorting to defaults");
+    ROS_WARN("[%s] no max_magnification_size param found; resorting to defaults",
+      PKG_NAME.c_str());
     ip_.max_magnification_size = 3;
   }
   else
@@ -200,7 +217,8 @@ FSMLO::initParams()
   // ---------------------------------------------------------------------------
   if (!nh_private_.getParam ("max_recoveries", int_param))
   {
-    ROS_WARN("[FSM_LIDOM] no max_recoveries param found; resorting to defaults");
+    ROS_WARN("[%s] no max_recoveries param found; resorting to defaults",
+      PKG_NAME.c_str());
     ip_.max_recoveries = 10;
   }
   else
@@ -214,6 +232,23 @@ FSMLO::initParams()
   assert(ip_.min_magnification_size >= 0);
   assert(ip_.max_magnification_size >= ip_.min_magnification_size);
   assert(ip_.max_recoveries >= 0);
+}
+
+
+/*******************************************************************************
+*/
+void
+FSMLO::publishResults(const std::tuple<double,double,double>& pose)
+{
+  // Construct pose estimate message and publish it
+  geometry_msgs::PoseStamped pose_msg = retypePose(pose);
+  pose_estimate_pub_.publish(pose_msg);
+
+  // Constrict trajectory estimate message and publish it
+  path_estimate_msg_.header.stamp = ros::Time::now();
+  path_estimate_msg_.header.frame_id = "/map";
+  path_estimate_msg_.poses.push_back(pose_msg);
+  path_estimate_pub_.publish(path_estimate_msg_);
 }
 
 
@@ -262,9 +297,10 @@ bool FSMLO::serviceClearTrajectory(
   std_srvs::Empty::Request &req,
   std_srvs::Empty::Response &res)
 {
-  ROS_INFO("[FSM_LIDOM] Clering trajectory vector...");
+  ROS_INFO("[%s] Clearing trajectory vector...", PKG_NAME.c_str());
   lock_ = true;
   path_estimate_.clear();
+  path_estimate_msg_.poses.clear();
   lock_ = false;
 }
 
@@ -292,7 +328,8 @@ bool FSMLO::serviceInitialPose(
     std::get<1>(initial_pose_) = pose_msg.pose.pose.position.y;
     std::get<2>(initial_pose_) = extractYawFromPose(pose_msg.pose.pose);
 
-    ROS_INFO("[FSM_LIDOM] Setting initial pose to (%.2f,%.2f,%.2f)",
+    ROS_INFO("[%s] Setting initial pose to (%.2f,%.2f,%.2f)",
+      PKG_NAME.c_str(),
       std::get<0>(initial_pose_),
       std::get<1>(initial_pose_),
       std::get<2>(initial_pose_));
@@ -300,7 +337,7 @@ bool FSMLO::serviceInitialPose(
   }
   else
   {
-    ROS_ERROR("[FSM_LIDOM] Failed to set initial pose");
+    ROS_ERROR("[%s] Failed to set initial pose", PKG_NAME.c_str());
     return false;
   }
 }
@@ -313,7 +350,7 @@ bool FSMLO::serviceStart(
   std_srvs::Empty::Request &req,
   std_srvs::Empty::Response &res)
 {
-  ROS_INFO("[FSM_LIDOM] Starting up...");
+  ROS_INFO("[%s] Starting up...", PKG_NAME.c_str());
   lock_ = false;
 }
 
@@ -325,7 +362,7 @@ bool FSMLO::serviceStop(
   std_srvs::Empty::Request &req,
   std_srvs::Empty::Response &res)
 {
-  ROS_INFO("[FSM_LIDOM] Shutting down...");
+  ROS_INFO("[%s] Shutting down...", PKG_NAME.c_str());
   lock_ = true;
 }
 
@@ -336,7 +373,10 @@ bool FSMLO::serviceStop(
 FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
 {
   if (lock_)
+  {
+    ROS_WARN("[%s] Will not process this scan", PKG_NAME.c_str());
     return;
+  }
 
   // New scan received
   sc_++;
@@ -383,22 +423,14 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
   // Do your magic thing
   FSM::Match::fmtdbh(sr_, current_pose_, vp, r2rp_, c2rp_, ip_, &op,
     &result_pose);
-  ROS_INFO("[FSM_LIDOM] FSM executed in %.1f ms", 1000*op.exec_time);
+  ROS_INFO("[%s] FSM executed in %.1f ms", PKG_NAME.c_str(), 1000*op.exec_time);
   // ---------------------------------------------------------------------------
 
-  // Publish the current pose estimate
-  pose_estimate_pub_.publish(retypePose(result_pose));
-
-  // Publish the whole trajectory estimate
+  // Append resulting pose to the estimated trajectory
   path_estimate_.push_back(result_pose);
-  nav_msgs::Path path;
-  path.header.stamp = ros::Time::now();
-  path.header.frame_id = "/map";
-  for (auto p(0); p < path_estimate_.size(); p++)
-    path.poses.push_back(retypePose(path_estimate_[p]));
 
-  path_estimate_pub_.publish(path);
-
+  // Publish `result_pose` and `path_estimate_`
+  publishResults(result_pose);
 
   // The new scan (at time t) becomes the old scan (at time t+1)
   sv_ = sr_;
