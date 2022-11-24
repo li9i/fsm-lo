@@ -101,11 +101,14 @@ class FSMLO
     // Scan counter
     unsigned int sc_;
 
-    // Current pose estimate
-    std::tuple<double,double,double> current_pose_;
+    // The origin (0,0,0)
+    std::tuple<double,double,double> origin;
 
     // The initial pose (optionally provided)
     std::tuple<double,double,double> initial_pose_;
+
+    // The transform
+    Eigen::Matrix3d M;
 
     // The path estimate
     std::vector< std::tuple<double,double,double> > path_estimate_;

@@ -8,7 +8,8 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   lock_(true),
   sc_(0),
   initial_pose_{0.0,0.0,0.0},
-  current_pose_{0.0,0.0,0.0},
+  origin{0.0,0.0,0.0},
+  M(Eigen::Matrix3d::Identity()),
   path_estimate_msg_(nav_msgs::Path())
 {
   ROS_INFO("[FSM_LIDOM] Init-ing...");
@@ -181,7 +182,7 @@ FSMLO::initParams()
   {
     ROS_WARN("[%s] no t_bound param found; resorting to defaults",
       PKG_NAME.c_str());
-    ip_.t_bound = M_PI/2;
+    ip_.t_bound = M_PI/4;
   }
 
   // ---------------------------------------------------------------------------
@@ -302,6 +303,8 @@ bool FSMLO::serviceClearTrajectory(
   path_estimate_.clear();
   path_estimate_msg_.poses.clear();
   lock_ = false;
+
+  return true;
 }
 
 
@@ -352,6 +355,8 @@ bool FSMLO::serviceStart(
 {
   ROS_INFO("[%s] Starting up...", PKG_NAME.c_str());
   lock_ = false;
+
+  return true;
 }
 
 
@@ -364,6 +369,8 @@ bool FSMLO::serviceStop(
 {
   ROS_INFO("[%s] Shutting down...", PKG_NAME.c_str());
   lock_ = true;
+
+  return true;
 }
 
 
@@ -390,13 +397,6 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
     sv_ = FSM::DatasetUtils::interpolateRanges(sv_);
     sv_ = FSM::Utils::subsampleScan(sv_, SIZE_SCAN);
 
-    // Set current pose estimate
-    current_pose_ = initial_pose_;
-    path_estimate_.push_back(current_pose_);
-
-    // Publish the current pose estimate
-    pose_estimate_pub_.publish(retypePose(current_pose_));
-
     return;
   }
   else
@@ -414,17 +414,30 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
 
   // The reference scan in 2d points
   std::vector< std::pair<double,double> > vp;
-  FSM::Utils::scan2points(sv_, current_pose_, &vp);
+  FSM::Utils::scan2points(sv_, origin, &vp);
 
   FSM::output_params op;
-  std::tuple<double,double,double> result_pose;
+  std::tuple<double,double,double> diffs;
 
   // ---------------------------------------------------------------------------
   // Do your magic thing
-  FSM::Match::fmtdbh(sr_, current_pose_, vp, r2rp_, c2rp_, ip_, &op,
-    &result_pose);
+  FSM::Match::fmtdbh(sr_, origin, vp, r2rp_, c2rp_, ip_, &op,
+    &diffs);
   ROS_INFO("[%s] FSM executed in %.1f ms", PKG_NAME.c_str(), 1000*op.exec_time);
   // ---------------------------------------------------------------------------
+
+  // Compute transform
+  M = FSM::Utils::computeTransform(diffs, M);
+
+  std::tuple<double,double,double> result_pose;
+  std::get<0>(result_pose) = M(0,2);
+  std::get<1>(result_pose) = M(1,2);
+  std::get<2>(result_pose) = atan2(M(1,0), M(0,0));
+
+  printf("%f,%f,%f\n", std::get<0>(result_pose),
+    std::get<1>(result_pose),
+    std::get<2>(result_pose));
+
 
   // Append resulting pose to the estimated trajectory
   path_estimate_.push_back(result_pose);
@@ -434,9 +447,6 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
 
   // The new scan (at time t) becomes the old scan (at time t+1)
   sv_ = sr_;
-
-  // The pose estimate at time t becomes the old estimate at time t+1
-  current_pose_ = result_pose;
 
   // Unlock
   lock_ = false;

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(fsm_lidom_ros)
 
-SET(CMAKE_CXX_COMPILER /usr/bin/g++)
 add_compile_options(-std=c++11 -Ofast)
 
 find_package(CGAL REQUIRED)

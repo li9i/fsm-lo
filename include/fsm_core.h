@@ -33,6 +33,7 @@
 #include <CGAL/squared_distance_2.h>
 #include <CGAL/Min_ellipse_2.h>
 #include <CGAL/Min_ellipse_2_traits_2.h>
+#include <eigen3/Eigen/Geometry>
 
 // --- TYPEDEFs ----------------------------------------------------------------
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
@@ -343,8 +344,8 @@ class X
   }
 
 
-  /*******************************************************************************
-  */
+  /*****************************************************************************
+   */
   static bool findExactOneRay(
     const double& px, const double& py, const double& tan_t_ray,
     const double& x_far, const double& y_far,
@@ -473,69 +474,36 @@ class Utils
 {
   public:
 
-  /*****************************************************************************
-  */
-  static std::pair<double,double> computeDeltaXY(
-    const std::vector< std::pair<double,double> >& real_scan_points,
-    const std::vector< std::pair<double,double> >& virtual_scan_points)
-  {
-    assert(real_scan_points.size() == virtual_scan_points.size());
-
-    unsigned int N = real_scan_points.size();
-
-    double delta_x = 0.0;
-    double delta_y = 0.0;
-    for (int i = 0; i < N; i++)
-    {
-      delta_x += real_scan_points[i].first - virtual_scan_points[i].first;
-      delta_y += real_scan_points[i].second - virtual_scan_points[i].second;
-    }
-
-    delta_x /= N;
-    delta_y /= N;
-
-    return std::make_pair(delta_x, delta_y);
-
-  }
 
   /*****************************************************************************
   */
-  static std::pair<double,double> computeDeltaXY(
-    const std::vector<double>& real_scan,
-    const std::tuple<double,double,double>& real_pose,
-    const std::vector<double>& virtual_scan,
-    const std::tuple<double,double,double>& virtual_pose)
+  static Eigen::Matrix3d
+  computeTransform(const std::tuple<double,double,double>& d,
+    const Eigen::Matrix3d& M)
   {
-    assert(real_scan.size() == virtual_scan.size());
+    double dx = std::get<0>(d);
+    double dy = std::get<1>(d);
+    double dt = std::get<2>(d);
 
-    double rx0 = std::get<0>(real_pose);
-    double ry0 = std::get<1>(real_pose);
-    double rt0 = std::get<2>(real_pose);
+    // Translation matrix
+    Eigen::Matrix3d T;
+    T = Eigen::Matrix3d::Identity();
+    T(0,2) = dx;
+    T(1,2) = dy;
 
-    double vx0 = std::get<0>(virtual_pose);
-    double vy0 = std::get<1>(virtual_pose);
-    double vt0 = std::get<2>(virtual_pose);
+    // Rotation matrix
+    Eigen::Matrix3d R;
+    R = Eigen::Matrix3d::Identity();
+    R(0,0) = +cosf(dt);
+    R(0,1) = -sin(dt);
+    R(1,0) = +sin(dt);
+    R(1,1) = +cosf(dt);
 
-    unsigned int N = real_scan.size();
+    // Compute the new transform matrix
+    Eigen::Matrix3d M_;
+    M_ = M * T * R;
 
-    double delta_x = 0.0;
-    double delta_y = 0.0;
-    for (int i = 0; i < real_scan.size(); i++)
-    {
-      double x_r = rx0 + real_scan[i]*cos(-M_PI + i*2*M_PI/N + rt0);
-      double y_r = ry0 + real_scan[i]*sin(-M_PI + i*2*M_PI/N + rt0);
-
-      double x_v = vx0 + virtual_scan[i]*cos(-M_PI + i*2*M_PI/N + vt0);
-      double y_v = vy0 + virtual_scan[i]*sin(-M_PI + i*2*M_PI/N + vt0);
-
-      delta_x += x_r - x_v;
-      delta_y += y_r - y_v;
-    }
-
-    //delta_x /= N;
-    //delta_y /= N;
-
-    return std::make_pair(delta_x, delta_y);
+    return M_;
   }
 
   /*****************************************************************************
@@ -797,52 +765,6 @@ class Utils
 
   /*****************************************************************************
   */
-  static bool isPositionInMap(
-    const std::tuple<double, double, double>& pose,
-    const std::vector< std::pair<double,double> >& map)
-  {
-    Point_2 point(std::get<0>(pose), std::get<1>(pose));
-
-    // Construct polygon from map
-    Polygon_2 poly;
-    for (int p = 0; p < map.size(); p++)
-      poly.push_back(Point_2(map[p].first, map[p].second));
-
-    poly.push_back(Point_2(map[map.size()-1].first, map[map.size()-1].second));
-
-    bool inside = false;
-    if(CGAL::bounded_side_2(poly.vertices_begin(),
-        poly.vertices_end(),
-        point, Kernel()) == CGAL::ON_BOUNDED_SIDE)
-    {
-      inside = true;
-    }
-
-    return inside;
-  }
-
-  /*****************************************************************************
-  */
-  static bool isPositionFartherThan(
-    const std::tuple<double, double, double>& pose,
-    const std::vector< std::pair<double,double> >& map,
-    const double& dist)
-  {
-    for (unsigned int i = 0; i < map.size(); i++)
-    {
-      double dx = std::get<0>(pose) - map[i].first;
-      double dy = std::get<1>(pose) - map[i].second;
-      double d = sqrt(dx*dx + dy*dy);
-
-      if (d < dist)
-        return false;
-    }
-
-    return true;
-  }
-
-  /*****************************************************************************
-  */
   static std::vector<double> innerProduct(const std::vector<double>& vec1,
     const std::vector<double>& vec2)
   {
@@ -893,6 +815,52 @@ class Utils
 #endif
 
     return ret_vector;
+  }
+
+  /*****************************************************************************
+  */
+  static bool isPositionInMap(
+    const std::tuple<double, double, double>& pose,
+    const std::vector< std::pair<double,double> >& map)
+  {
+    Point_2 point(std::get<0>(pose), std::get<1>(pose));
+
+    // Construct polygon from map
+    Polygon_2 poly;
+    for (int p = 0; p < map.size(); p++)
+      poly.push_back(Point_2(map[p].first, map[p].second));
+
+    poly.push_back(Point_2(map[map.size()-1].first, map[map.size()-1].second));
+
+    bool inside = false;
+    if(CGAL::bounded_side_2(poly.vertices_begin(),
+        poly.vertices_end(),
+        point, Kernel()) == CGAL::ON_BOUNDED_SIDE)
+    {
+      inside = true;
+    }
+
+    return inside;
+  }
+
+  /*****************************************************************************
+  */
+  static bool isPositionFartherThan(
+    const std::tuple<double, double, double>& pose,
+    const std::vector< std::pair<double,double> >& map,
+    const double& dist)
+  {
+    for (unsigned int i = 0; i < map.size(); i++)
+    {
+      double dx = std::get<0>(pose) - map[i].first;
+      double dy = std::get<1>(pose) - map[i].second;
+      double d = sqrt(dx*dx + dy*dy);
+
+      if (d < dist)
+        return false;
+    }
+
+    return true;
   }
 
   /*****************************************************************************
@@ -1072,7 +1040,7 @@ class Utils
     return (a > 0.0) - (a < 0.0);
   }
 
-  /*******************************************************************************
+  /*****************************************************************************
   */
   static std::vector<double>
   subsampleScan(const std::vector<double>& scan_in, const size_t& sz)
@@ -1093,7 +1061,7 @@ class Utils
     return scan_out;
   }
 
-  /*****************************************************************************
+  /***************************************************************************
   */
   static std::vector< std::pair<double,double> > vectorDiff(
     const std::vector< std::pair<double,double> >& vec)
@@ -1106,7 +1074,7 @@ class Utils
     return ret_vector;
   }
 
-  /*****************************************************************************
+  /***************************************************************************
   */
   static std::pair<double,double> vectorStatistics(
     const std::vector< double >& v)
@@ -1124,7 +1092,7 @@ class Utils
     return std::make_pair(mean, stdev);
   }
 
-  /*****************************************************************************
+  /***************************************************************************
   */
   static void wrapAngle(double* angle)
   {
@@ -1139,7 +1107,7 @@ class DatasetUtils
 {
   public:
 
-  /*****************************************************************************
+  /***************************************************************************
   */
   static std::vector< std::vector< std::pair<double,double> > >
     dataset2points(const char* dataset_filepath)
@@ -1178,7 +1146,7 @@ class DatasetUtils
       return polygons;
     }
 
-  /*****************************************************************************
+  /***************************************************************************
   */
   static void dataset2rangesAndPose(
     const char* dataset_filepath,
@@ -1270,7 +1238,7 @@ class DatasetUtils
   }
 
   /*****************************************************************************
-   */
+  */
   static std::vector<double>
   interpolateRanges( const std::vector<double>& ranges)
   {
@@ -1323,7 +1291,7 @@ class DatasetUtils
       regions[i].clear();
 
       for (unsigned int j = begin; j <= end; j++)
-         regions[i].push_back(j);
+        regions[i].push_back(j);
     }
 
 
@@ -1342,14 +1310,14 @@ class DatasetUtils
     }
 
     /*
-    for (int i = 0; i < regions.size(); i++)
-    {
-      printf("region %d\n", i);
-      for (int j = 0; j < regions[i].size(); j++)
-        printf("%d,", regions[i][j]);
-      printf("\n");
-    }
-    */
+       for (int i = 0; i < regions.size(); i++)
+       {
+       printf("region %d\n", i);
+       for (int j = 0; j < regions[i].size(); j++)
+       printf("%d,", regions[i][j]);
+       printf("\n");
+       }
+       */
 
     std::vector<double> ranges_interp = ranges;
 
@@ -1369,13 +1337,13 @@ class DatasetUtils
       double interp = (range_a + range_b)/2;
 
       for (unsigned int j = 0; j < regions[i].size(); j++)
-         ranges_interp[regions[i][j]]= interp;
+        ranges_interp[regions[i][j]]= interp;
     }
 
     /*
-    for (int j = 0; j < ranges.size(); j++)
-      printf("%f\n", ranges_interp[j]);
-    */
+       for (int j = 0; j < ranges.size(); j++)
+       printf("%f\n", ranges_interp[j]);
+       */
 
     return ranges_interp;
   }
@@ -2013,7 +1981,7 @@ class DFTUtils
   /*****************************************************************************
   */
   static std::vector< std::pair<double, double> >
-    getDFTCoefficientsPairs(const std::vector<double>& coeffs)
+  getDFTCoefficientsPairs(const std::vector<double>& coeffs)
   {
 #ifdef TIMES
     std::chrono::high_resolution_clock::time_point a =
@@ -2622,7 +2590,7 @@ class Translation
     if (pick_min)
     {
       std::vector<double> crit_v = sum_d_vs;
-      double min_sum_d_idx =
+      unsigned int min_sum_d_idx =
         std::min_element(crit_v.begin(), crit_v.end()) -crit_v.begin();
       sum_d_v = sum_d_vs[min_sum_d_idx];
       double x_tot = std::accumulate(x_es.begin(), x_es.begin()+min_sum_d_idx, 0.0);
@@ -2758,7 +2726,10 @@ public:
       return fmt2Sequential(real_scan, virtual_pose, map, magnification_size,
         rc0, rc1, intersections_time);
     else
+    {
       printf("[Rotation::fmt] Use 'batch' or 'sequential' instead \n");
+      std::vector<double> dv; dv.push_back(-1.0); return dv;
+    }
   }
 
   /***************************************************************************
@@ -3544,59 +3515,6 @@ class Match
     bool up_lock = false;
     int total_iterations = 0;
     int num_iterations = 0;
-
-
-    // ROTATION ONLY TEST; (same location) ---------------------------------------
-#if defined (TEST_ROTATION_ONLY_DISC) || defined (TEST_ROTATION_ONLY_CONT)
-    while (current_magnification_size <= max_magnification_size)
-    {
-      printf("current_magnification_size = %d ---\n", current_magnification_size);
-      printf("counter                    = %d ---\n", counter);
-
-      // -------------------------------------------------------------------------
-      // -------------------------------------------------------------------------
-      // ------------------ Rotation correction phase ----------------------------
-      std::vector<double> rc0;
-      std::vector<double> rc1;
-      std::vector<double> dts;
-
-      dts = Rotation::fmt(real_scan, *result_pose, map,
-        current_magnification_size, "batch", r2rp, c2rp,
-        &rc0, &rc1, &intersections_time);
-
-      unsigned int max_rc0_idx = std::max_element(rc0.begin(), rc0.end())
-        - rc0.begin();
-      std::get<2>(*result_pose) += dts[max_rc0_idx];
-      Utils::wrapAngle(&std::get<2>(*result_pose));
-
-      current_magnification_size++;
-    }
-    return;
-#endif
-
-    // TRANSLATION ONLY TEST; (same orientation) ---------------------------------
-#if defined (TEST_TRANSLATION_ONLY)
-    int tr_iterations = -1;
-    double trans_criterion = 0.0;
-    do
-    {
-      current_magnification_size = max_magnification_size;
-      double int_time_trans = 0.0;
-
-      trans_criterion = Translation::tff(real_scan, *result_pose, map, 60, false,
-        ip.xy_bound, r2rp, &tr_iterations, &int_time_trans, result_pose);
-
-      if (trans_criterion != -2.0)
-        current_magnification_size++;
-      else
-        while(!Utils::generatePose(virtual_pose, map,
-            ip.xy_bound, 0.0, 0.0, result_pose));
-
-    } while (trans_criterion == -2.0);
-
-    return;
-#endif
-
 
     while (current_magnification_size <= max_magnification_size)
     {
