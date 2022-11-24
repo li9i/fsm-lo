@@ -22,9 +22,13 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   scan_sub_ =
     nh_.subscribe(scan_topic_, 1, &FSMLO::scanCallback, this);
 
+  // Clearing the estimated trajectory service
+  clear_trajectory_service_ = nh_.advertiseService(
+    "fsm_lidom/clear_estimated_trajectory", &FSMLO::serviceClearTrajectory, this);
+
   // Initial pose setting service
   set_initial_pose_service_ = nh_.advertiseService(
-    "fsm_lidom/set_initial_pose_service", &FSMLO::initialPoseService, this);
+    "fsm_lidom/set_initial_pose", &FSMLO::serviceInitialPose, this);
 
   // Start service
   start_service_= nh_.advertiseService(
@@ -97,39 +101,6 @@ FSMLO::extractYawFromPose(const geometry_msgs::Pose& pose)
   return yaw;
 }
 
-
-/*******************************************************************************
- * If there is an initial pose then set it
-*/
-bool FSMLO::initialPoseService(
-  std_srvs::Empty::Request &req,
-  std_srvs::Empty::Response &res)
-{
-  boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> pose_msg_shared;
-  geometry_msgs::PoseWithCovarianceStamped pose_msg;
-
-  // Take only one message from `initial_pose_topic_`
-  pose_msg_shared =
-    ros::topic::waitForMessage<geometry_msgs::PoseWithCovarianceStamped>(
-      initial_pose_topic_);
-
-  if (pose_msg_shared != NULL)
-  {
-    pose_msg = *pose_msg_shared;
-
-    std::get<0>(initial_pose_) = pose_msg.pose.pose.position.x;
-    std::get<1>(initial_pose_) = pose_msg.pose.pose.position.y;
-    std::get<2>(initial_pose_) = extractYawFromPose(pose_msg.pose.pose);
-
-    ROS_INFO("[FSM_LIDOM] Setting initial pose");
-    return true;
-  }
-  else
-  {
-    ROS_ERROR("[FSM_LIDOM] Failed to set initial pose");
-    return false;
-  }
-}
 
 /*******************************************************************************
 */
@@ -287,6 +258,57 @@ FSMLO::retypePose(const std::tuple<double,double,double>& pose)
 /*******************************************************************************
  *
  */
+bool FSMLO::serviceClearTrajectory(
+  std_srvs::Empty::Request &req,
+  std_srvs::Empty::Response &res)
+{
+  ROS_INFO("[FSM_LIDOM] Clering trajectory vector...");
+  lock_ = true;
+  path_estimate_.clear();
+  lock_ = false;
+}
+
+
+/*******************************************************************************
+ * If there is an initial pose then set it
+*/
+bool FSMLO::serviceInitialPose(
+  std_srvs::Empty::Request &req,
+  std_srvs::Empty::Response &res)
+{
+  boost::shared_ptr<geometry_msgs::PoseWithCovarianceStamped const> pose_msg_shared;
+  geometry_msgs::PoseWithCovarianceStamped pose_msg;
+
+  // Take only one message from `initial_pose_topic_`
+  pose_msg_shared =
+    ros::topic::waitForMessage<geometry_msgs::PoseWithCovarianceStamped>(
+      initial_pose_topic_);
+
+  if (pose_msg_shared != NULL)
+  {
+    pose_msg = *pose_msg_shared;
+
+    std::get<0>(initial_pose_) = pose_msg.pose.pose.position.x;
+    std::get<1>(initial_pose_) = pose_msg.pose.pose.position.y;
+    std::get<2>(initial_pose_) = extractYawFromPose(pose_msg.pose.pose);
+
+    ROS_INFO("[FSM_LIDOM] Setting initial pose to (%.2f,%.2f,%.2f)",
+      std::get<0>(initial_pose_),
+      std::get<1>(initial_pose_),
+      std::get<2>(initial_pose_));
+    return true;
+  }
+  else
+  {
+    ROS_ERROR("[FSM_LIDOM] Failed to set initial pose");
+    return false;
+  }
+}
+
+
+/*******************************************************************************
+ *
+ */
 bool FSMLO::serviceStart(
   std_srvs::Empty::Request &req,
   std_srvs::Empty::Response &res)
@@ -361,20 +383,14 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
   // Do your magic thing
   FSM::Match::fmtdbh(sr_, current_pose_, vp, r2rp_, c2rp_, ip_, &op,
     &result_pose);
-  ROS_INFO("[FSM_LIDOM] FSM executed in %f sec\n", op.exec_time);
+  ROS_INFO("[FSM_LIDOM] FSM executed in %.1f ms", 1000*op.exec_time);
   // ---------------------------------------------------------------------------
 
-  // The new scan (at time t) becomes the old scan (at time t+1)
-  sv_ = sr_;
-
-  // The pose estimate at time t becomes the old estimate at  time t+1
-  current_pose_ = result_pose;
-  path_estimate_.push_back(current_pose_);
-
   // Publish the current pose estimate
-  pose_estimate_pub_.publish(retypePose(current_pose_));
+  pose_estimate_pub_.publish(retypePose(result_pose));
 
-  // Publish the whole path estimate
+  // Publish the whole trajectory estimate
+  path_estimate_.push_back(result_pose);
   nav_msgs::Path path;
   path.header.stamp = ros::Time::now();
   path.header.frame_id = "/map";
@@ -382,6 +398,13 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
     path.poses.push_back(retypePose(path_estimate_[p]));
 
   path_estimate_pub_.publish(path);
+
+
+  // The new scan (at time t) becomes the old scan (at time t+1)
+  sv_ = sr_;
+
+  // The pose estimate at time t becomes the old estimate at time t+1
+  current_pose_ = result_pose;
 
   // Unlock
   lock_ = false;

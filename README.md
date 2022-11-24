@@ -100,11 +100,12 @@ Found in `config/params.yaml`:
 
 #### Services offered
 
-| Service                              | Type             | Utility                                                                                                                                          |
-| ------------------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `fsm_lidom/service_start`            | `std_srvs/Empty` | commences node functionality                                                                                                                     |
-| `fsm_lidom/service_stop`             | `std_srvs/Empty` | halts node functionality (node remains alive)                                                                                                    |
-| `fsm_lidom/set_initial_pose_service` | `std_srvs/Empty` | calling this service means: node subscribes to `initial_pose_topic`, obtains the latest pose estimate, sets fsm's initial pose, and unsubscribes |
+| Service                                | Type             | Utility                                                                                                                                          |
+| -------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `fsm_lidom/clear_estimated_trajectory` | `std_srvs/Empty` | clears the vector of estimated poses                                                                                                             |
+| `fsm_lidom/set_initial_pose`           | `std_srvs/Empty` | calling this service means: node subscribes to `initial_pose_topic`, obtains the latest pose estimate, sets fsm's initial pose, and unsubscribes |
+| `fsm_lidom/start`                      | `std_srvs/Empty` | commences node functionality                                                                                                                     |
+| `fsm_lidom/stop`                       | `std_srvs/Empty` | halts node functionality (node remains alive)                                                                                                    |
 
 ---
 

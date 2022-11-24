@@ -50,6 +50,10 @@ class FSMLO
     // Path estimate publisher
     ros::Publisher path_estimate_pub_;
 
+
+    // Clearing the estimated trajectory service
+    ros::ServiceServer clear_trajectory_service_;
+
     // Initial pose setting service
     ros::ServiceServer set_initial_pose_service_;
 
@@ -114,9 +118,6 @@ class FSMLO
     double extractYawFromPose(
       const geometry_msgs::Pose& pose);
 
-    bool initialPoseService(
-      std_srvs::Empty::Request &req,
-      std_srvs::Empty::Response &res);
 
     void initParams();
 
@@ -126,6 +127,12 @@ class FSMLO
     geometry_msgs::PoseStamped retypePose(
       const std::tuple<double,double,double>& pose);
 
+    bool serviceClearTrajectory(
+      std_srvs::Empty::Request &req,
+      std_srvs::Empty::Response &res);
+    bool serviceInitialPose(
+      std_srvs::Empty::Request &req,
+      std_srvs::Empty::Response &res);
     bool serviceStart(
       std_srvs::Empty::Request &req,
       std_srvs::Empty::Response &res);
