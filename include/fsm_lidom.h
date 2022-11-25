@@ -18,8 +18,11 @@
 #include <functional>
 
 #include <ros/ros.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_ros/transform_broadcaster.h>
 #include <tf/transform_datatypes.h>
 #include <sensor_msgs/LaserScan.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <nav_msgs/Path.h>
 #include <std_srvs/Empty.h>
@@ -116,6 +119,14 @@ class FSMLO
     // The path estimate
     nav_msgs::Path path_estimate_msg_;
 
+    // Map frame name
+    std::string map_frame_;
+
+    // Lidar odometry frame name
+    std::string lidom_frame_;
+
+    // Transform /map -> /lidom
+    tf2_ros::TransformBroadcaster lidom_tf_;
 
     // **** methods
 
@@ -128,7 +139,7 @@ class FSMLO
 
     void initParams();
 
-    void publishResults();
+    void publishLIDOM();
 
     std::vector<double> retypeScan(
       const sensor_msgs::LaserScan::Ptr& scan_msg);

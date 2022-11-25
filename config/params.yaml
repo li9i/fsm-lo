@@ -5,6 +5,12 @@ pose_estimate_topic: "/fsm_lidom/pose_estimate"
 path_estimate_topic: "/fsm_lidom/path_estimate"
 size_scan: 360
 
+# Frames' parameters (The current pose is also published in the form of a
+# transform [map_frame -> lidom_frame]---the sensor's current frame with
+# respect to the map frame)
+map_frame: '/map'
+lidom_frame: '/lidom'
+
 # FSM parameters
 min_magnification_size: 0
 max_magnification_size: 3

@@ -10,6 +10,10 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   geometry_msgs
   nav_msgs
+  tf2
+  tf2_geometry_msgs
+  tf2_msgs
+  tf2_ros
   message_generation
 )
 
@@ -20,6 +24,9 @@ catkin_package(
   geometry_msgs
   nav_msgs
   message_runtime
+  tf2
+  tf2_msgs
+  tf2_ros
   INCLUDE_DIRS include
 )
 
