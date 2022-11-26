@@ -67,11 +67,11 @@ Found in `config/params.yaml`:
 | `path_estimate_topic`    | `fsm_lidom_ros`'s total trajectory estimate is published here       |
 | `lidom_topic`            | `fsm_lidom_ros`'s odometry estimate is published here               |
 
-| Frame ids         | Description                           |
-| ----------------- | ------------------------------------- |
-| `global_frame_id` | the global frame id (e.g. map)        |
-| `base_frame_id`   | the lidar sensor's reference frame id |
-| `lidom_frame_id`  | the (lidar) odometry's frame id       |
+| Frame ids         | Description                                                     |
+| ----------------- | -------------------------------------                           |
+| `global_frame_id` | the global frame id (e.g. `/map`)                               |
+| `base_frame_id`   | the lidar sensor's reference frame id (e.g. `/base_laser_link`) |
+| `lidom_frame_id`  | the (lidar) odometry's frame id                                 |
 
 | FSM-specific parameters  | Description                                                                                                       |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
