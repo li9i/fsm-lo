@@ -90,8 +90,8 @@ Found in `config/params.yaml`:
 ```
 lidom_frame_id <- base_frame_id
 ```
-in other words `fsm_lidom_node` publishes the transform from `base_laser_link`
-(or equivalent) to the equivalent of `odom` (in this case `lidom_frame_id`)
+in other words `fsm_lidom_node` publishes the transform from `/base_laser_link`
+(or equivalent) to the equivalent of `/odom` (in this case `lidom_frame_id`)
 
 
 ---
