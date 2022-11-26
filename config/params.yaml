@@ -17,7 +17,7 @@ base_frame_id:   '/base_laser_link'
 lidom_frame_id:  '/lidom'
 
 # FSM parameters
-size_scan:           360
+size_scan:              360
 min_magnification_size: 0
 max_magnification_size: 3
 num_iterations:         2

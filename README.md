@@ -59,26 +59,52 @@ roslaunch fsm_lidom_ros avanti_fsm_lidom.launch
 
 Found in `config/params.yaml`:
 
-| Node-specific parameters | What is this?                                                                    |
-| ------------------------ | -------------------------------------------------------------------------------- |
-| `scan_topic`             | 2d panoramic scans are published here                                            |
-| `initial_pose_topic`     | (optional) the topic where an initial pose estimate may be provided              |
-| `pose_estimate_topic`    | `fsm_lidar_ros`'s pose estimates are published here                              |
-| `path_estimate_topic`    | `fsm_lidar_ros`'s total trajectory estimate is published here                    |
-| `scan_size`              | for resizing the input scans' size (execution time is proportional to scan size) |
+| IO Topics                | Description                                                         |
+| ------------------------ | ------------------------------------------------------------------- |
+| `scan_topic`             | 2d panoramic scans are published here                               |
+| `initial_pose_topic`     | (optional) the topic where an initial pose estimate may be provided |
+| `pose_estimate_topic`    | `fsm_lidom_ros`'s pose estimates are published here                 |
+| `path_estimate_topic`    | `fsm_lidom_ros`'s total trajectory estimate is published here       |
+| `lidom_topic`            | `fsm_lidom_ros`'s odometry estimate is published here               |
 
-| FSM-specific parameters  | And this?                                                                                         |
-| ------------------------ | ------------------------------------------------------------------------------------------------- |
-| `min_magnification_size` | base angular oversampling                                                                         |
-| `max_magnification_size` | maximum angular oversampling                                                                      |
-| `num_iterations`         | Greater sensor velocity requires higher values                                                    |
-| `xy_bound`               | Axiswise radius for randomly generating a new initial position estimate in case of recovery       |
-| `t_bound`                | Angularwise radius for randomly generating a new initial orientation estimate in case of recovery |
-| `max_counter`            | Lower values decrease execution time                                                              |
-| `max_recoveries`         | Ditto                                                                                             |
+| Frame ids         | Description                           |
+| ----------------- | ------------------------------------- |
+| `global_frame_id` | the global frame id (e.g. map)        |
+| `base_frame_id`   | the lidar sensor's reference frame id |
+| `lidom_frame_id`  | the (lidar) odometry's frame id       |
+
+| FSM-specific parameters  | Description                                                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `size_scan`              | the size of scans that are matched (execution time is proportional to scan size, hence subsampling may be needed) |
+| `min_magnification_size` | base angular oversampling                                                                                         |
+| `max_magnification_size` | maximum angular oversampling                                                                                      |
+| `num_iterations`         | Greater sensor velocity requires higher values                                                                    |
+| `xy_bound`               | Axiswise radius for randomly generating a new initial position estimate in case of recovery                       |
+| `t_bound`                | Angularwise radius for randomly generating a new initial orientation estimate in case of recovery                 |
+| `max_counter`            | Lower values decrease execution time                                                                              |
+| `max_recoveries`         | Ditto                                                                                                             |
 
 ---
 
+#### Transforms published
+```
+lidom_frame_id <- base_frame_id
+```
+in other words `fsm_lidom_node` publishes the transform from `base_laser_link`
+(or equivalent) to the equivalent of `odom` (in this case `lidom_frame_id`)
+
+
+---
+
+#### Published topics
+
+| Topic                 | Type                        | Utility                                                                       |
+| --------------------- | ----------------------------| ------------------------------------------------                              |
+| `pose_estimate_topic` | `geometry_msgs/PoseStamped` | the current pose estimate relative to the global frame is published here      |
+| `path_estimate_topic` | `nav_msgs/Path`             | the total estimated trajectory relative to the global frame is published here |
+| `lidom_topic`         | `nav_msgs/Odometry`         | the odometry is published here                                                |
+
+---
 
 #### Subscribed topics
 
@@ -86,15 +112,6 @@ Found in `config/params.yaml`:
 | -------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------|
 | `scan_topic`         | `sensor_msgs/LaserScan`                  | 2d panoramic scans are published here                                                  |
 | `initial_pose_topic` | `geometry_msgs/PoseWithCovarianceStamped`| optional---for setting the very first pose estimate to something other than the origin |
-
----
-
-#### Published topics
-
-| Topic                 | Type                        | Utility                                          |
-| --------------------- | ----------------------------| ------------------------------------------------ |
-| `pose_estimate_topic` | `geometry_msgs/PoseStamped` | the current pose estimate is published here      |
-| `path_estimate_topic` | `nav_msgs/Path`             | the total estimated trajectory is published here |
 
 ---
 
