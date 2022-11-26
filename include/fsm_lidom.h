@@ -24,7 +24,9 @@
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include <nav_msgs/Path.h>
+#include <nav_msgs/Odometry.h>
 #include <std_srvs/Empty.h>
 #include "fsm_core.h"
 
@@ -48,6 +50,9 @@ class FSMLO
 
     // Scan topic subscriber
     ros::Subscriber scan_sub_;
+
+    // LIDOM publisher
+    ros::Publisher lidom_pub_;
 
     // Pose estimate publisher
     ros::Publisher pose_estimate_pub_;
@@ -81,6 +86,9 @@ class FSMLO
     // The topic where fsm's path estimate is published
     std::string path_estimate_topic_;
 
+    // The topic where fsm's odometry is published
+    std::string lidom_topic_;
+
 
     // Params
     size_t SIZE_SCAN;
@@ -101,6 +109,12 @@ class FSMLO
     // Current range scan
     std::vector<double> sr_;
 
+    // Previous scan receipt time
+    ros::Time tv_;
+
+    // Current scan receipt time
+    ros::Time tr_;
+
     // Scan counter
     unsigned int sc_;
 
@@ -120,10 +134,13 @@ class FSMLO
     nav_msgs::Path path_estimate_msg_;
 
     // Map frame name
-    std::string map_frame_;
+    std::string global_frame_id_;
+
+    // Base frame name
+    std::string base_frame_id_;
 
     // Lidar odometry frame name
-    std::string lidom_frame_;
+    std::string lidom_frame_id_;
 
     // Transform /map -> /lidom
     tf2_ros::TransformBroadcaster lidom_tf_;
@@ -138,14 +155,23 @@ class FSMLO
 
 
     void initParams();
+    void initPSS();
 
-    void publishLIDOM();
+    void publishLIDOM(const std::tuple<double,double,double>& diff);
+    void publishLIDOMMessage(const std::tuple<double,double,double>& diff);
+    void publishLIDOMPathMessage();
+    void publishLIDOMPoseMessage();
+    void publishLIDOMTransform(const std::tuple<double,double,double>& diff);
 
     std::vector<double> retypeScan(
       const sensor_msgs::LaserScan::Ptr& scan_msg);
 
-    geometry_msgs::PoseStamped retypePose(
+    geometry_msgs::Pose retypePose(
       const std::tuple<double,double,double>& pose);
+
+    geometry_msgs::PoseStamped retypePoseStamped(
+      const std::tuple<double,double,double>& pose,
+      const std::string& frame_id);
 
     bool serviceClearTrajectory(
       std_srvs::Empty::Request &req,

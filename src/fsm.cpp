@@ -16,38 +16,15 @@ FSMLO::FSMLO(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   // init params
   initParams();
 
+  // init publishers, subscribers, and services
+  initPSS();
+
   // cache fftw plans for efficiency of execution
   cacheFFTW3Plans(SIZE_SCAN);
 
-  // The subscriber to the input scans topic
-  scan_sub_ =
-    nh_.subscribe(scan_topic_, 1, &FSMLO::scanCallback, this);
-
-  // Clearing the estimated trajectory service
-  clear_trajectory_service_ = nh_.advertiseService(
-    "fsm_lidom/clear_estimated_trajectory", &FSMLO::serviceClearTrajectory, this);
-
-  // Initial pose setting service
-  set_initial_pose_service_ = nh_.advertiseService(
-    "fsm_lidom/set_initial_pose", &FSMLO::serviceInitialPose, this);
-
-  // Start service
-  start_service_= nh_.advertiseService(
-    "fsm_lidom/start", &FSMLO::serviceStart, this);
-
-  // Stop service
-  stop_service_= nh_.advertiseService(
-    "fsm_lidom/stop", &FSMLO::serviceStop, this);
-
-  // fsm's pose estimate
-  pose_estimate_pub_ =
-    nh_.advertise<geometry_msgs::PoseStamped>(pose_estimate_topic_, 1);
-
-  // fsm's path estimate
-  path_estimate_pub_ =
-    nh_.advertise<nav_msgs::Path>(path_estimate_topic_, 1);
-
-  ROS_INFO("[%s] Init-ed.", PKG_NAME.c_str());
+  ROS_INFO("[%s] Init-ed.",                                   PKG_NAME.c_str());
+  ROS_INFO("[%s] To start production of lidar odometry issue",PKG_NAME.c_str());
+  ROS_INFO("%*s rosservice call /fsm_lidom/start", (int)(PKG_NAME.size()+2),"");
 }
 
 
@@ -146,6 +123,14 @@ FSMLO::initParams()
     ROS_WARN("[%s] no path_estimate_topic param found; resorting to defaults",
       PKG_NAME.c_str());
     path_estimate_topic_ = "/fsm_lidom/path_estimate";
+
+  }
+  // ---------------------------------------------------------------------------
+  if (!nh_private_.getParam ("lidom_topic", lidom_topic_))
+  {
+    ROS_WARN("[%s] no lidom_topic param found; resorting to defaults",
+      PKG_NAME.c_str());
+    lidom_topic_ = "/fsm_lidom/lidom";
   }
 
   // ---------------------------------------------------------------------------
@@ -159,19 +144,27 @@ FSMLO::initParams()
     SIZE_SCAN = static_cast<unsigned int>(int_param);
 
   // ---------------------------------------------------------------------------
-  if (!nh_private_.getParam ("map_frame", map_frame_))
+  if (!nh_private_.getParam ("global_frame_id", global_frame_id_))
   {
-    ROS_WARN("[%s] no map_frame param found; resorting to defaults",
+    ROS_WARN("[%s] no global_frame_id param found; resorting to defaults",
       PKG_NAME.c_str());
-    map_frame_ = "/map";
+    global_frame_id_ = "/map";
   }
 
   // ---------------------------------------------------------------------------
-  if (!nh_private_.getParam ("lidom_frame", lidom_frame_))
+  if (!nh_private_.getParam ("base_frame_id", base_frame_id_))
   {
-    ROS_WARN("[%s] no lidom_frame param found; resorting to defaults",
+    ROS_WARN("[%s] no base_frame_id param found; resorting to defaults",
       PKG_NAME.c_str());
-    lidom_frame_ = "/lidom";
+    base_frame_id_ = "/base_laser_link";
+  }
+
+  // ---------------------------------------------------------------------------
+  if (!nh_private_.getParam ("lidom_frame_id", lidom_frame_id_))
+  {
+    ROS_WARN("[%s] no lidom_frame_id param found; resorting to defaults",
+      PKG_NAME.c_str());
+    lidom_frame_id_ = "/lidom";
   }
 
   // ---------------------------------------------------------------------------
@@ -254,22 +247,147 @@ FSMLO::initParams()
 /*******************************************************************************
 */
 void
-FSMLO::publishLIDOM()
+FSMLO::initPSS()
 {
-  // Construct /map -> /lidom transform and publish it -------------------------
+  // The subscriber to the input scans topic
+  scan_sub_ =
+    nh_.subscribe(scan_topic_, 1, &FSMLO::scanCallback, this);
+
+  // Clearing the estimated trajectory service
+  clear_trajectory_service_ = nh_.advertiseService(
+    "fsm_lidom/clear_estimated_trajectory", &FSMLO::serviceClearTrajectory, this);
+
+  // Initial pose setting service
+  set_initial_pose_service_ = nh_.advertiseService(
+    "fsm_lidom/set_initial_pose", &FSMLO::serviceInitialPose, this);
+
+  // Start service
+  start_service_= nh_.advertiseService(
+    "fsm_lidom/start", &FSMLO::serviceStart, this);
+
+  // Stop service
+  stop_service_= nh_.advertiseService(
+    "fsm_lidom/stop", &FSMLO::serviceStop, this);
+
+  // fsm's lidom publisher
+  lidom_pub_ = nh_.advertise<nav_msgs::Odometry>(lidom_topic_, 1);
+
+  // fsm's pose estimate
+  pose_estimate_pub_ =
+    nh_.advertise<geometry_msgs::PoseStamped>(pose_estimate_topic_, 1);
+
+  // fsm's path estimate
+  path_estimate_pub_ =
+    nh_.advertise<nav_msgs::Path>(path_estimate_topic_, 1);
+}
+
+
+/*******************************************************************************
+*/
+  void
+FSMLO::publishLIDOM(const std::tuple<double,double,double>& diff)
+{
+  // Transform -----------------------------------------------------------------
+  publishLIDOMTransform(diff);
+
+  // Messages ------------------------------------------------------------------
+  publishLIDOMMessage(diff);
+  publishLIDOMPoseMessage();
+  publishLIDOMPathMessage();
+}
+
+
+/*******************************************************************************
+ * Construct /lidom_frame_id <- /base_frame_id odometry message and publish it
+ */
+void
+FSMLO::publishLIDOMMessage(const std::tuple<double,double,double>& diff)
+{
+  // Header
+  nav_msgs::Odometry lidom_msg;
+  lidom_msg.header.seq = sc_;
+  lidom_msg.header.stamp = tr_;
+  lidom_msg.header.frame_id = lidom_frame_id_;
+  lidom_msg.child_frame_id = base_frame_id_;
+
+  // Pose
+  geometry_msgs::PoseWithCovariance lidom_pose_msg;
+  lidom_pose_msg.pose = retypePose(diff);
+
+  // Pose covariance---no estimate on it whatsoever
+  boost::array<double, 36> cov = {};
+  lidom_pose_msg.covariance = cov;
+
+  // Velocity
+  geometry_msgs::TwistWithCovariance lidom_twist_msg;
+  lidom_twist_msg.twist.linear.x = std::get<0>(diff) / (tr_-tv_).toSec();
+  lidom_twist_msg.twist.linear.y = std::get<1>(diff) / (tr_-tv_).toSec();
+  lidom_twist_msg.twist.linear.z = 0.0;
+  lidom_twist_msg.twist.angular.x = 0.0;
+  lidom_twist_msg.twist.angular.y = 0.0;
+  lidom_twist_msg.twist.angular.z = std::get<2>(diff) / (tr_-tv_).toSec();
+  lidom_twist_msg.covariance = cov;
+
+  lidom_msg.pose  = lidom_pose_msg;
+  lidom_msg.twist = lidom_twist_msg;
+
+  // Publish the lidom message
+  lidom_pub_.publish(lidom_msg);
+}
+
+
+/*******************************************************************************
+ * The total path estimate with respect to the global frame
+ */
+void
+FSMLO::publishLIDOMPathMessage()
+{
+  geometry_msgs::PoseStamped pose_msg =
+    retypePoseStamped(path_estimate_.back(), global_frame_id_);
+
+  // Construct trajectory estimate message and publish it
+  path_estimate_msg_.header.seq = sc_;
+  path_estimate_msg_.header.stamp = tr_;
+  path_estimate_msg_.header.frame_id = global_frame_id_;
+  path_estimate_msg_.poses.push_back(pose_msg);
+  path_estimate_pub_.publish(path_estimate_msg_);
+}
+
+
+/*******************************************************************************
+ * The current pose estimate with respect to the global frame
+ */
+  void
+FSMLO::publishLIDOMPoseMessage()
+{
+  geometry_msgs::PoseStamped pose_msg =
+    retypePoseStamped(path_estimate_.back(), global_frame_id_);
+
+  pose_estimate_pub_.publish(pose_msg);
+}
+
+
+/*******************************************************************************
+ * Construct /lidom_frame_id <- /base_frame_id transform and publish it
+ */
+void
+FSMLO::publishLIDOMTransform(const std::tuple<double,double,double>& diff)
+{
+  // The transform msg
   geometry_msgs::TransformStamped tfStamped;
-  tfStamped.header.stamp = ros::Time::now();
-  tfStamped.header.frame_id = map_frame_;
-  tfStamped.child_frame_id = lidom_frame_;
+  tfStamped.header.seq = sc_;
+  tfStamped.header.stamp = tr_;
+  tfStamped.header.frame_id = lidom_frame_id_;
+  tfStamped.child_frame_id = base_frame_id_;
 
   // Set translation
-  tfStamped.transform.translation.x = M(0,2);
-  tfStamped.transform.translation.y = M(1,2);
+  tfStamped.transform.translation.x = std::get<0>(diff);
+  tfStamped.transform.translation.y = std::get<1>(diff);
   tfStamped.transform.translation.z = 0.0;
 
   // Set rotation
   tf2::Quaternion q;
-  q.setRPY(0,0, atan2(M(1,0),M(0,0)));
+  q.setRPY(0,0, std::get<2>(diff));
   tfStamped.transform.rotation.x = q.x();
   tfStamped.transform.rotation.y = q.y();
   tfStamped.transform.rotation.z = q.z();
@@ -277,18 +395,6 @@ FSMLO::publishLIDOM()
 
   // Publish transform
   lidom_tf_.sendTransform(tfStamped);
-
-  // Current pose in ROS msg form ----------------------------------------------
-  geometry_msgs::PoseStamped pose_msg = retypePose(path_estimate_.back());
-
-  // Construct trajectory estimate message and publish it -------------
-  path_estimate_msg_.header.stamp = ros::Time::now();
-  path_estimate_msg_.header.frame_id = map_frame_;
-  path_estimate_msg_.poses.push_back(pose_msg);
-  path_estimate_pub_.publish(path_estimate_msg_);
-
-  // Construct pose estimate message and publish it -------------------
-  pose_estimate_pub_.publish(pose_msg);
 }
 
 
@@ -308,25 +414,41 @@ FSMLO::retypeScan(const sensor_msgs::LaserScan::Ptr& scan_msg)
 
 /*******************************************************************************
 */
-geometry_msgs::PoseStamped
+  geometry_msgs::Pose
 FSMLO::retypePose(const std::tuple<double,double,double>& pose)
 {
-  geometry_msgs::PoseStamped pose_msg;
-  pose_msg.header.stamp = ros::Time::now();
-  pose_msg.header.frame_id = "/map";
+  geometry_msgs::Pose pose_msg;
 
   // Set position
-  pose_msg.pose.position.x = std::get<0>(pose);
-  pose_msg.pose.position.y = std::get<1>(pose);
-  pose_msg.pose.position.z = 0.0;
+  pose_msg.position.x = std::get<0>(pose);
+  pose_msg.position.y = std::get<1>(pose);
+  pose_msg.position.z = 0.0;
 
   // Set orientation
   tf::Quaternion q;
   q.setRPY(0.0, 0.0, std::get<2>(pose));
   q.normalize();
-  tf::quaternionTFToMsg(q, pose_msg.pose.orientation);
+  tf::quaternionTFToMsg(q, pose_msg.orientation);
 
   return pose_msg;
+}
+
+
+/*******************************************************************************
+*/
+geometry_msgs::PoseStamped
+FSMLO::retypePoseStamped(const std::tuple<double,double,double>& pose,
+  const std::string& frame_id)
+{
+  geometry_msgs::PoseStamped posestamped_msg;
+  posestamped_msg.header.seq = sc_;
+  posestamped_msg.header.stamp = tr_;
+  posestamped_msg.header.frame_id = frame_id;
+
+  // Set pose
+  posestamped_msg.pose = retypePose(pose);
+
+  return posestamped_msg;
 }
 
 
@@ -350,7 +472,7 @@ bool FSMLO::serviceClearTrajectory(
 
 /*******************************************************************************
  * If there is an initial pose then set it
-*/
+ */
 bool FSMLO::serviceInitialPose(
   std_srvs::Empty::Request &req,
   std_srvs::Empty::Response &res)
@@ -400,7 +522,9 @@ bool FSMLO::serviceStart(
   std_srvs::Empty::Request &req,
   std_srvs::Empty::Response &res)
 {
-  ROS_INFO("[%s] Starting up...", PKG_NAME.c_str());
+  ROS_INFO("[%s] lidar odometry is now available.",PKG_NAME.c_str());
+  ROS_INFO("[%s] To shut down issue",              PKG_NAME.c_str());
+  ROS_INFO("%*s rosservice call /fsm_lidom/stop",  (int)(PKG_NAME.size()+2),"");
   lock_ = false;
 
   return true;
@@ -414,7 +538,9 @@ bool FSMLO::serviceStop(
   std_srvs::Empty::Request &req,
   std_srvs::Empty::Response &res)
 {
-  ROS_INFO("[%s] Shutting down...", PKG_NAME.c_str());
+  ROS_INFO("[%s] lidar odometry is shut down.",    PKG_NAME.c_str());
+  ROS_INFO("[%s] To bring up issue",               PKG_NAME.c_str());
+  ROS_INFO("%*s rosservice call /fsm_lidom/start", (int)(PKG_NAME.size()+2),"");
   lock_ = true;
 
   return true;
@@ -443,6 +569,7 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
     sv_ = retypeScan(scan_msg);
     sv_ = FSM::DatasetUtils::interpolateRanges(sv_);
     sv_ = FSM::Utils::subsampleScan(sv_, SIZE_SCAN);
+    tv_ = ros::Time::now();
 
     return;
   }
@@ -456,6 +583,7 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
     sr_ = retypeScan(scan_msg);
     sr_ = FSM::DatasetUtils::interpolateRanges(sr_);
     sr_ = FSM::Utils::subsampleScan(sr_, SIZE_SCAN);
+    tr_ = ros::Time::now();
   }
 
 
@@ -464,33 +592,29 @@ FSMLO::scanCallback(const sensor_msgs::LaserScan::Ptr& scan_msg)
   FSM::Utils::scan2points(sv_, origin, &vp);
 
   FSM::output_params op;
-  std::tuple<double,double,double> diffs;
+  std::tuple<double,double,double> diff;
 
   // ---------------------------------------------------------------------------
   // Do your magic thing
   FSM::Match::fmtdbh(sr_, origin, vp, r2rp_, c2rp_, ip_, &op,
-    &diffs);
+    &diff);
   ROS_INFO("[%s] FSM executed in %.1f ms", PKG_NAME.c_str(), 1000*op.exec_time);
   // ---------------------------------------------------------------------------
 
   // Compute transform
-  std::tuple<double,double,double> result_pose;
-  M = FSM::Utils::computeTransform(diffs, M);
-
-  // The current pose; the current frame; the current pose with respect to the
-  // map frame
-  std::get<0>(result_pose) = M(0,2);
-  std::get<1>(result_pose) = M(1,2);
-  std::get<2>(result_pose) = atan2(M(1,0), M(0,0));
+  M = FSM::Utils::computeTransform(diff, M);
 
   // Append resulting pose to the estimated trajectory
-  path_estimate_.push_back(result_pose);
+  path_estimate_.push_back(
+    std::make_tuple(M(0,2), M(1,2), atan2(M(1,0), M(0,0))));
 
   // Publish `result_pose` and `path_estimate_`
-  publishLIDOM();
+  publishLIDOM(diff);
 
-  // The new scan (at time t) becomes the old scan (at time t+1)
+  // The sensed scan    sr_ captured at time t (tr_) becomes
+  // the reference scan sv_ captured at time t+1
   sv_ = sr_;
+  tv_ = tr_;
 
   // Unlock
   lock_ = false;
