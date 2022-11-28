@@ -61,7 +61,9 @@ roslaunch fsm_lidom_ros avanti_fsm_lidom.launch
 | -------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------|
 | `scan_topic`         | `sensor_msgs/LaserScan`                  | 2d panoramic scans are published here                                                  |
 | `initial_pose_topic` | `geometry_msgs/PoseWithCovarianceStamped`| optional---for setting the very first pose estimate to something other than the origin |
+
 ---
+
 #### Published topics
 
 | Topic                 | Type                        | Utility                                                                       |
@@ -69,7 +71,9 @@ roslaunch fsm_lidom_ros avanti_fsm_lidom.launch
 | `pose_estimate_topic` | `geometry_msgs/PoseStamped` | the current pose estimate relative to the global frame is published here      |
 | `path_estimate_topic` | `nav_msgs/Path`             | the total estimated trajectory relative to the global frame is published here |
 | `lidom_topic`         | `nav_msgs/Odometry`         | the odometry is published here                                                |
+
 ---
+
 #### Services offered
 
 | Service                                | Type             | Utility                                                                                                                                          |
@@ -78,7 +82,9 @@ roslaunch fsm_lidom_ros avanti_fsm_lidom.launch
 | `fsm_lidom/set_initial_pose`           | `std_srvs/Empty` | calling this service means: node subscribes to `initial_pose_topic`, obtains the latest pose estimate, sets fsm's initial pose, and unsubscribes |
 | `fsm_lidom/start`                      | `std_srvs/Empty` | commences node functionality                                                                                                                     |
 | `fsm_lidom/stop`                       | `std_srvs/Empty` | halts node functionality (node remains alive)                                                                                                    |
+
 ---
+
 #### Parameters
 
 Found in `config/params.yaml`:
@@ -107,14 +113,20 @@ Found in `config/params.yaml`:
 | `t_bound`                | Angularwise radius for randomly generating a new initial orientation estimate in case of recovery                 |
 | `max_counter`            | Lower values decrease execution time                                                                              |
 | `max_recoveries`         | Ditto                                                                                                             |
+
 ---
+
 #### Transforms published
+
 ```
 lidom_frame_id <- base_frame_id
 ```
+
 in other words `fsm_lidom_node` publishes the transform from `/base_laser_link`
 (or equivalent) to the equivalent of `/odom` (in this case `lidom_frame_id`)
+
 ---
+
 ## Motivation and Under the hood
 
 ### 1 min summary video
