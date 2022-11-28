@@ -17,28 +17,28 @@ RUN useradd -ms /bin/bash li9i
 USER li9i
 WORKDIR /home/li9i
 
-RUN echo "source /opt/ros/kinetic/setup.bash"           >> /home/li9i/.bashrc
+RUN echo "source /opt/ros/kinetic/setup.bash" >> /home/li9i/.bashrc
 RUN echo "source /home/li9i/catkin_ws/devel/setup.bash" >> /home/li9i/.bashrc
 
 RUN rosdep update
-RUN mkdir -p /home/li9i/catkin_ws/src                   && \
-    cd /home/li9i/catkin_ws/src/                        && \
+RUN mkdir -p /home/li9i/catkin_ws/src && \
+    cd /home/li9i/catkin_ws/src/ && \
     git clone https://github.com/li9i/fsm_lidom_ros.git && \
-    cd /home/li9i/catkin_ws                             && \
-    export CC=gcc                                       && \
-    export CXX=g++                                      && \
-    alias g++='g++ -std=c++11'                          && \
-    alias clang++='clang++ -std=c++11'                  && \
-    source /opt/ros/kinetic/setup.bash                  && \
-    catkin build fsm_lidom_ros                          && \
-    source /opt/ros/kinetic/setup.bash                  && \
+    cd /home/li9i/catkin_ws && \
+    export CC=gcc && \
+    export CXX=g++ && \
+    alias g++='g++ -std=c++11' && \
+    alias clang++='clang++ -std=c++11' && \
+    source /opt/ros/kinetic/setup.bash && \
+    catkin build fsm_lidom_ros && \
+    source /opt/ros/kinetic/setup.bash && \
     source /home/li9i/catkin_ws/devel/setup.bash
 
 # The next five lines + the entrypoint command will make sure that
 # when the container is run the fsm_lidom_node is roslaunched immediately
-RUN echo "#!/bin/bash"                                      > /home/li9i/fsm_launch.sh
-RUN echo "source /opt/ros/kinetic/setup.bash"              >> /home/li9i/fsm_launch.sh
-RUN echo "source /home/li9i/catkin_ws/devel/setup.bash"    >> /home/li9i/fsm_launch.sh
+RUN echo "#!/bin/bash" > /home/li9i/fsm_launch.sh
+RUN echo "source /opt/ros/kinetic/setup.bash" >> /home/li9i/fsm_launch.sh
+RUN echo "source /home/li9i/catkin_ws/devel/setup.bash" >> /home/li9i/fsm_launch.sh
 RUN echo "roslaunch fsm_lidom_ros avanti_fsm_lidom.launch" >> /home/li9i/fsm_launch.sh
 RUN chmod +x /home/li9i/fsm_launch.sh
 
