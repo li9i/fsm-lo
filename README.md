@@ -140,10 +140,12 @@ in other words `fsm_lidom_node` publishes the transform from `/base_laser_link`
 (Incomplete)
 
 ```bibtex
-@INPROCEEDINGS{fsm_iros_2022,
-  author    = {Alexandros Filotheou, Georgios D. Sergiadis, Antonis G. Dimitriou},
-  booktitle = {2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-  title     = {FSM: Correspondenceless scan-matching of panoramic 2D range scans},
-  year      = {2022},
-  doi       = {TBA}
-}
+@INPROCEEDINGS{9981228,
+  author={Filotheou, Alexandros and Sergiadis, Georgios D. and Dimitriou, Antonis G.}
+  booktitle={2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  title={FSM: Correspondenceless scan-matching of panoramic 2D range scans},
+  year={2022},
+  volume={},
+  number={},
+  pages={6968-6975},
+  doi={10.1109/IROS47612.2022.9981228}}
