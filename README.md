@@ -132,12 +132,10 @@ in other words `fsm_lidom_node` publishes the transform from `/base_laser_link`
 ### 1 min summary video
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/hB4qsHCEXGI/0.jpg)](http://www.youtube.com/watch?v=hB4qsHCEXGI "1 min summary video")
 
-### IROS 2022 presentation slides
-[PDF link](https://raw.githubusercontent.com/li9i/fsm_presentation_iros22/master/main.pdf)
+<!-- ### IROS 2022 presentation slides -->
+<!-- [PDF link](https://raw.githubusercontent.com/li9i/fsm_presentation_iros22/master/main.pdf) -->
 
 ### IROS 2022 paper
-
-(Incomplete)
 
 ```bibtex
 @INPROCEEDINGS{9981228,
@@ -145,7 +143,5 @@ in other words `fsm_lidom_node` publishes the transform from `/base_laser_link`
   booktitle={2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
   title={FSM: Correspondenceless scan-matching of panoramic 2D range scans},
   year={2022},
-  volume={},
-  number={},
   pages={6968-6975},
   doi={10.1109/IROS47612.2022.9981228}}
