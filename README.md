@@ -1,5 +1,7 @@
 # ROS wrapper (cpp) for the Fourier Scan Matcher ([FSM](https://github.com/li9i/fsm)) in the guise of lidar odometry.
 
+#### [[ IEEE IROS ](https://ieeexplore.ieee.org/abstract/document/9981228)] [[ Video ](https://www.youtube.com/watch?v=hB4qsHCEXGI)] [[ Presentation ](https://github.com/phd-li9i/fsm_presentation_iros22/blob/master/main.pdf)]
+
 Functionally `fsm_lidom_ros` assumes a 2D LIDAR sensor with a field of view of
 360 degrees and executing it while the sensor is on the move will output an estimate
 of its trajectory.
