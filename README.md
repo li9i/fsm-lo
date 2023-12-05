@@ -3,8 +3,29 @@
 #### [[ IEEE IROS ](https://ieeexplore.ieee.org/abstract/document/9981228)] [[ Video ](https://www.youtube.com/watch?v=hB4qsHCEXGI)] [[ Presentation ](https://github.com/phd-li9i/fsm_presentation_iros22/blob/master/main.pdf)]
 
 Functionally `fsm_lidom_ros` assumes a 2D LIDAR sensor with a field of view of
-360 degrees and executing it while the sensor is on the move will output an estimate
-of its trajectory.
+360 degrees. Executing `fsm_lidom_ros` while the sensor is on the move will
+output an estimate of its trajectory.
+
+
+Table of Contents
+=================
+* [Installation](#installation)
+  * [Via Docker](#via-docker)
+  * [Via the traditional method](#via-the-traditional-method)
+    * [Dependencies](#dependencies-cgal-47-fftw3-boostrandom)
+    * [Building](#building)
+    * [Executing](#executing)
+* [Nodes](#nodes)
+  * [`fsm_lidom_node`](#fsm_lidom_node)
+    * [Subscribed topics](#subscribed-topics)
+    * [Published topics](#published-topics)
+    * [Services offered](#services-offered)
+    * [Parameters](#parameters)
+    * [Transforms published](#transforms-published)
+* [Motivation and Under the hood](#motivation-and-under-the-hood)
+  * [1 min summary video](#1-min-summary-video)
+  * [IROS 2022 paper](#iros-2022-paper)
+
 
 
 ## Installation
