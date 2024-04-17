@@ -52,8 +52,8 @@ or build the image with the most recent code of this repository
 cd ~/catkin_ws/src
 git clone git@github.com:li9i/fsm_lidom_ros.git
 cd fsm_lidom_ros/docker
-./build_fsm_lidom_image.sh
-./run_fsm_lidom_container.sh
+docker compose build
+docker compose up
 ```
 
 ### Via the traditional method

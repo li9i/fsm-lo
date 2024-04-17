@@ -1,0 +1,21 @@
+services:
+
+  fsm:
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: li9i/fsm_lidom_ros:latest
+
+    container_name: fsm_lidom_ros_container
+
+    stdin_open: true
+    tty: true
+    network_mode: "host"
+    ipc: host
+
+    environment:
+      - DISPLAY=${DISPLAY}
+
+    user: ${USERNAME:-li9i}
