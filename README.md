@@ -33,7 +33,7 @@ Table of Contents
 
 ### Via Docker
 
-```
+```console
 docker pull li9i/fsm_lidom_ros
 
 docker run -it \
@@ -46,7 +46,7 @@ docker run -it \
 
 or build the image with the most recent code of this repository
 
-```
+```console
 cd ~/catkin_ws/src
 git clone git@github.com:li9i/fsm_lidom_ros.git
 cd fsm_lidom_ros/docker
@@ -62,7 +62,7 @@ Tested in Ubuntu 16.04 and ROS kinetic
 
 #### Building
 
-```
+```console
 cd ~/catkin_ws/src
 git clone git@github.com:li9i/fsm_lidom_ros.git
 cd ~/catkin_ws
@@ -71,7 +71,7 @@ catkin build fsm_lidom_ros
 
 #### Executing
 
-```
+```console
 roslaunch fsm_lidom_ros avanti_fsm_lidom.launch
 ```
 
