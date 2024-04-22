@@ -7,6 +7,10 @@
 
 Functionally `fsm_lidom_ros` assumes a 2D LIDAR sensor with a field of view of 360 degrees. Executing `fsm_lidom_ros` while the sensor is on the move will output an estimate of its trajectory. Lidar odometry is achieved via scan-matching without using correspondences, based on properties of the Discrete Fourier Transform.
 
+## Why use FSM
+
+![Experimental results at a glance](https://i.imgur.com/GvFlHgF.png)
+
 
 Table of Contents
 =================
@@ -33,7 +37,7 @@ Table of Contents
 
 ### Via Docker
 
-```console
+```sh
 docker pull li9i/fsm_lidom_ros
 
 docker run -it \
@@ -46,7 +50,7 @@ docker run -it \
 
 or build the image with the most recent code of this repository
 
-```console
+```sh
 cd ~/catkin_ws/src
 git clone git@github.com:li9i/fsm_lidom_ros.git
 cd fsm_lidom_ros/docker
@@ -62,7 +66,7 @@ Tested in Ubuntu 16.04 and ROS kinetic
 
 #### Building
 
-```console
+```sh
 cd ~/catkin_ws/src
 git clone git@github.com:li9i/fsm_lidom_ros.git
 cd ~/catkin_ws
@@ -71,7 +75,7 @@ catkin build fsm_lidom_ros
 
 #### Executing
 
-```console
+```sh
 roslaunch fsm_lidom_ros avanti_fsm_lidom.launch
 ```
 
