@@ -4,8 +4,7 @@
 [![youtube.com](https://img.shields.io/badge/1'_presentation-YouTube-FF0000)](https://www.youtube.com/watch?v=hB4qsHCEXGI)
 [![github.com](https://img.shields.io/badge/pdf_presentation-333333)](https://github.com/phd-li9i/fsm_presentation_iros22/blob/master/main.pdf)
 
-
-Functionally `fsm_lidom_ros` assumes a 2D LIDAR sensor with a field of view of 360 degrees. Executing `fsm_lidom_ros` while the sensor is on the move will output an estimate of its trajectory. Lidar odometry is achieved via scan-matching without using correspondences, based on properties of the Discrete Fourier Transform.
+`fsm_lidom_ros` is the ROS wrapper of [`fsm`](https://github.com/li9i/fsm). Functionally `fsm_lidom_ros` assumes a 2D LIDAR sensor with a field of view of 360 degrees. Executing `fsm_lidom_ros` while the sensor is on the move will output an estimate of its trajectory. Lidar odometry is achieved via scan-matching without using correspondences, based on properties of the Discrete Fourier Transform. 
 
 ## Why use FSM
 
