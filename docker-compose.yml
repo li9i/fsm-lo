@@ -18,4 +18,4 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
 
-    user: ${USERNAME:-li9i}
+    user: ${USERNAME:-user_fsm}

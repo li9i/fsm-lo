@@ -37,6 +37,8 @@ Table of Contents
 
 ### Via Docker
 
+If this is your first time running docker then I happen to find [this](https://youtu.be/SAMPOK_lazw?t=67) docker installation guide very friendly and easy to follow. Then pull the docker image and run it with
+
 ```sh
 docker pull li9i/fsm_lidom_ros
 
@@ -51,11 +53,8 @@ docker run -it \
 or build the image with the most recent code of this repository
 
 ```sh
-cd ~/catkin_ws/src
-git clone git@github.com:li9i/fsm_lidom_ros.git
-cd fsm_lidom_ros/docker
+git clone git@github.com:li9i/fsm_lidom_ros.git; cd fsm_lidom_ros
 docker compose build
-docker compose up
 ```
 
 ### Via the traditional method
@@ -64,20 +63,46 @@ Tested in Ubuntu 16.04 and ROS kinetic
 
 #### Dependencies: `CGAL 4.7` `FFTW3` `boost/random`
 
-#### Building
-
 ```sh
 cd ~/catkin_ws/src
 git clone git@github.com:li9i/fsm_lidom_ros.git
-cd ~/catkin_ws
+cd fsm_lidom_ros; mv fsm/* $PWD; rmdir fsm; cd ../..
 catkin build fsm_lidom_ros
 ```
 
-#### Executing
+## Run
+
+### Launch
+
+#### Via Docker
+
+```sh
+docker compose up
+```
+
+#### Via traditional means
+
 
 ```sh
 roslaunch fsm_lidom_ros avanti_fsm_lidom.launch
 ```
+
+### Call
+
+Launching `fsm` simply makes it go into stand-by mode and does not actually execute anything. To do so simply call the provided service
+
+#### Via Docker
+
+```sh
+docker exec -it fsm_lidom_ros_container sh -c "source ~/catkin_ws/devel/setup.bash; rosservice call /fsm_lidom/start"
+```
+
+#### Via traditional means
+
+```sh
+rosservice call /fsm_lidom/start
+```
+
 
 ## Nodes
 

@@ -1,4 +1,4 @@
-#include <fsm_lidom.h>
+#include <fsm.h>
 
 int main(int argc, char** argv)
 {
