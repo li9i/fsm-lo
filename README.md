@@ -20,8 +20,8 @@ Table of Contents
     * [Building](#building)
     * [Executing](#executing)
 * [Run](#run)
-  * [Launch][#launch]
-  * [Call][#call]
+  * [Launch](#launch)
+  * [Call](#call)
 * [Nodes](#nodes)
   * [`fsm_lidom_node`](#fsm_lidom_node)
     * [Subscribed topics](#subscribed-topics)
