@@ -4,7 +4,7 @@
 [![youtube.com](https://img.shields.io/badge/1'_presentation-YouTube-FF0000)](https://www.youtube.com/watch?v=hB4qsHCEXGI)
 [![github.com](https://img.shields.io/badge/pdf_presentation-333333)](https://github.com/phd-li9i/fsm_presentation_iros22/blob/master/main.pdf)
 
-`fsm_lidom_ros` is the ROS wrapper of [`fsm`](https://github.com/li9i/fsm). Functionally `fsm_lidom_ros` assumes a 2D LIDAR sensor with a field of view of 360 degrees. Executing `fsm_lidom_ros` while the sensor is on the move will output an estimate of its trajectory. Lidar odometry is achieved via scan-matching without using correspondences, based on properties of the Discrete Fourier Transform. 
+`fsm_lidom_ros` is the ROS wrapper of [`fsm`](https://github.com/li9i/fsm). Functionally `fsm_lidom_ros` assumes a 2D LIDAR sensor with a field of view of 360 degrees. Executing `fsm_lidom_ros` while the sensor is on the move will output an estimate of its trajectory. Lidar odometry is achieved via scan-matching without using correspondences, based on properties of the Discrete Fourier Transform.
 
 ## Why use FSM
 
@@ -15,10 +15,13 @@ Table of Contents
 =================
 * [Installation](#installation)
   * [Via Docker](#via-docker)
-  * [Via the traditional method](#via-the-traditional-method)
+  * [Via traditional means](#via-traditional-means)
     * [Dependencies](#dependencies-cgal-47-fftw3-boostrandom)
     * [Building](#building)
     * [Executing](#executing)
+* [Run](#run)
+  * [Launch][#launch]
+  * [Call][#call]
 * [Nodes](#nodes)
   * [`fsm_lidom_node`](#fsm_lidom_node)
     * [Subscribed topics](#subscribed-topics)
@@ -56,7 +59,7 @@ git clone git@github.com:li9i/fsm_lidom_ros.git; cd fsm_lidom_ros
 docker compose build
 ```
 
-### Via the traditional method
+### Via traditional means
 
 Tested in Ubuntu 16.04 and ROS kinetic
 
