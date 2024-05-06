@@ -6,6 +6,10 @@
 
 `fsm_lidom_ros` provides LIDAR odometry from measurements of a single panoramic 2D LIDAR sensor, a.k.a. a sensor whose field of view is 360 degrees. `fsm_lidom_ros` is the ROS wrapper of [`fsm`](https://github.com/li9i/fsm).
 
+<p align="center">
+  <img src="https://i.imgur.com/hUsBImy.png">
+</p>
+
 Lidar odometry is achieved via scan-matching _but without using correspondences_ due to the range signal's periodicity. 
 Hence FSM may exploit properties of the Discrete Fourier Transform. 
 These two pillars support the robustness of FSM's pose error to sensor noise and distance between consecutive poses, as you can see in the figure that summarises key experiments below.
