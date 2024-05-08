@@ -10,8 +10,8 @@
   <img src="https://i.imgur.com/hUsBImy.png">
 </p>
 
-Lidar odometry is achieved via scan-matching _but without using correspondences_ due to the range signal's periodicity. 
-Hence FSM may exploit properties of the Discrete Fourier Transform. 
+Lidar odometry is achieved via scan-matching _but without establishing correspondences_ by leveraging the range signal's periodicity.
+Hence FSM may exploit properties of the Discrete Fourier Transform.
 These two pillars support the robustness of FSM's pose error to sensor noise and distance between consecutive poses, as you can see in the figure that summarises key experiments below.
 
 ## Why use FSM
