@@ -54,7 +54,7 @@ docker compose build
 or pull the docker image and run it with
 
 ```sh
-docker pull li9i/fsm_lidom_ros
+docker pull li9i/fsm_lidom_ros:latest
 
 docker run -it \
     --name=fsm_lidom_ros_container \
