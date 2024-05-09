@@ -44,7 +44,14 @@ Table of Contents
 
 ### Via Docker
 
-If this is your first time running docker then I happen to find [this](https://youtu.be/SAMPOK_lazw?t=67) docker installation guide very friendly and easy to follow. Then pull the docker image and run it with
+If this is your first time running docker then I happen to find [this](https://youtu.be/SAMPOK_lazw?t=67) docker installation guide very friendly and easy to follow. Then build the image with the most recent code of this repository using `compose` with
+
+```sh
+git clone git@github.com:li9i/fsm_lidom_ros.git; cd fsm_lidom_ros
+docker compose build
+```
+
+or pull the docker image and run it with
 
 ```sh
 docker pull li9i/fsm_lidom_ros
@@ -55,13 +62,6 @@ docker run -it \
     --net=host \
     --rm \
     li9i/fsm_lidom_ros:latest
-```
-
-or build the image with the most recent code of this repository
-
-```sh
-git clone git@github.com:li9i/fsm_lidom_ros.git; cd fsm_lidom_ros
-docker compose build
 ```
 
 ### Via traditional means
