@@ -47,7 +47,8 @@ Table of Contents
 If this is your first time running docker then I happen to find [this](https://youtu.be/SAMPOK_lazw?t=67) docker installation guide very friendly and easy to follow. Then build the image with the most recent code of this repository using `compose` with
 
 ```sh
-git clone git@github.com:li9i/fsm_lidom_ros.git; cd fsm_lidom_ros
+git clone git@github.com:li9i/fsm_lidom_ros.git
+cd fsm_lidom_ros
 docker compose build
 ```
 
