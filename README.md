@@ -123,7 +123,6 @@ rosservice call /fsm_lidom/start
 | `scan_topic`         | `sensor_msgs/LaserScan`                  | 2d panoramic scans are published here                                                  |
 | `initial_pose_topic` | `geometry_msgs/PoseWithCovarianceStamped`| optional---for setting the very first pose estimate to something other than the origin |
 
----
 
 #### Published topics
 
@@ -133,7 +132,6 @@ rosservice call /fsm_lidom/start
 | `path_estimate_topic` | `nav_msgs/Path`             | the total estimated trajectory relative to the global frame is published here |
 | `lidom_topic`         | `nav_msgs/Odometry`         | the odometry is published here                                                |
 
----
 
 #### Services offered
 
@@ -144,7 +142,6 @@ rosservice call /fsm_lidom/start
 | `fsm_lidom/start`                      | `std_srvs/Empty` | commences node functionality                                                                                                                     |
 | `fsm_lidom/stop`                       | `std_srvs/Empty` | halts node functionality (node remains alive)                                                                                                    |
 
----
 
 #### Parameters
 
@@ -175,7 +172,6 @@ Found in `config/params.yaml`:
 | `max_counter`            | Lower values decrease execution time                                                                              |
 | `max_recoveries`         | Ditto                                                                                                             |
 
----
 
 #### Transforms published
 
@@ -186,7 +182,6 @@ lidom_frame_id <- base_frame_id
 in other words `fsm_lidom_node` publishes the transform from `/base_laser_link`
 (or equivalent) to the equivalent of `/odom` (in this case `lidom_frame_id`)
 
----
 
 ## Motivation and Under the hood
 
