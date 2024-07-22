@@ -2,7 +2,7 @@
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "fsm_lidom");
+  ros::init(argc, argv, "fsm_lo");
   ros::NodeHandle nh;
   ros::NodeHandle nh_private("~");
 

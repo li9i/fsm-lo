@@ -1,20 +1,20 @@
 # IO Topics
 scan_topic:          "/base_scan"
 initial_pose_topic:  "/amcl_pose"  # optional
-pose_estimate_topic: "/fsm_lidom/pose_estimate"
-path_estimate_topic: "/fsm_lidom/path_estimate"
-lidom_topic:         "/fsm_lidom/lidom"
+pose_estimate_topic: "/fsm_lo/pose_estimate"
+path_estimate_topic: "/fsm_lo/path_estimate"
+lo_topic:         "/fsm_lo/lo"
 
 # Frames' parameters
-# The fsm_lidom_node publishes:
+# The fsm_lo_node publishes:
 # (a) The transform between consecutive laser frames in the form of a tf
-# from `base_frame_id` to `lidom_frame_id`
+# from `base_frame_id` to `lo_frame_id`
 # (b) The transform between consecutive laser frames in the form of a message
-# (nav_msgs/Odometry) from `base_frame_id` to `lidom_frame_id`, and
+# (nav_msgs/Odometry) from `base_frame_id` to `lo_frame_id`, and
 # (c) The current pose estimate with respect to a global frame
 global_frame_id: '/map'
 base_frame_id:   '/base_laser_link'
-lidom_frame_id:  '/lidom'
+lo_frame_id:  '/lo'
 
 # FSM parameters
 size_scan:              360

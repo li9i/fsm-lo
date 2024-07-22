@@ -17,7 +17,7 @@ RUN rosdep update
 RUN mkdir -p /home/user_fsm/catkin_ws/src && \
     cd /home/user_fsm/catkin_ws/src/
 
-COPY fsm/ /home/user_fsm/catkin_ws/src/fsm/
+COPY fsm_lo/ /home/user_fsm/catkin_ws/src/fsm_lo/
 
 RUN cd /home/user_fsm/catkin_ws && \
     export CC=gcc && \
@@ -25,7 +25,7 @@ RUN cd /home/user_fsm/catkin_ws && \
     alias g++='g++ -std=c++11' && \
     alias clang++='clang++ -std=c++11' && \
     source /opt/ros/kinetic/setup.bash && \
-    catkin build fsm_lidom_ros && \
+    catkin build fsm_lo && \
     source /opt/ros/kinetic/setup.bash && \
     source /home/user_fsm/catkin_ws/devel/setup.bash
 
@@ -34,7 +34,7 @@ RUN cd /home/user_fsm/catkin_ws && \
 RUN echo "#!/bin/bash" > /home/user_fsm/fsm_launch.sh
 RUN echo "source /opt/ros/kinetic/setup.bash" >> /home/user_fsm/fsm_launch.sh
 RUN echo "source /home/user_fsm/catkin_ws/devel/setup.bash" >> /home/user_fsm/fsm_launch.sh
-RUN echo "roslaunch fsm_lidom_ros avanti_fsm_lidom.launch" >> /home/user_fsm/fsm_launch.sh
+RUN echo "roslaunch fsm_lo avanti.launch" >> /home/user_fsm/fsm_launch.sh
 RUN chmod +x /home/user_fsm/fsm_launch.sh
 
 ENTRYPOINT bash /home/user_fsm/fsm_launch.sh

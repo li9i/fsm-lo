@@ -1,0 +1,8 @@
+<launch>
+
+  <node name="fsm_lo_node" pkg="fsm_lo" type="fsm_node" output="screen">
+    <param name="pkg_name"   type="string" value="FSM_LO" />
+    <rosparam command="load" file="$(find fsm_lo)/config/params.yaml" />
+  </node>
+
+</launch>

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(fsm_lidom_ros)
+project(fsm_lo)
 
 add_compile_options(-std=c++11 -Ofast)
 
@@ -35,12 +35,12 @@ INCLUDE_DIRECTORIES(include
   /usr/include/eigen3/)
 
 # sm ###########################################################################
-add_library(fsm_lidom src/fsm.cpp)
-target_link_libraries(fsm_lidom
+add_library(fsm_lo src/fsm.cpp)
+target_link_libraries(fsm_lo
   fftw3
   CGAL::CGAL_Core
   ${catkin_LIBRARIES})
-add_dependencies(fsm_lidom
+add_dependencies(fsm_lo
   ${catkin_EXPORTED_TARGETS})
 
 # The executable ###############################################################
@@ -48,7 +48,7 @@ add_executable(fsm_node
   src/fsm_node.cpp)
 
 target_link_libraries(fsm_node
-  fsm_lidom
+  fsm_lo
   ${catkin_LIBRARIES})
 
 add_dependencies(fsm_node

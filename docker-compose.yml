@@ -6,9 +6,9 @@ services:
       context: .
       dockerfile: Dockerfile
 
-    image: li9i/fsm_lidom_ros:latest
+    image: li9i/fsm_lo:latest
 
-    container_name: fsm_lidom_ros_container
+    container_name: fsm_lo_container
 
     stdin_open: true
     tty: true

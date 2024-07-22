@@ -4,7 +4,7 @@
 [![youtube.com](https://img.shields.io/badge/1'_presentation-YouTube-FF0000)](https://www.youtube.com/watch?v=hB4qsHCEXGI)
 [![github.com](https://img.shields.io/badge/pdf_presentation-333333)](https://github.com/phd-li9i/fsm_presentation_iros22/blob/master/main.pdf)
 
-`fsm_lidom_ros` provides LIDAR odometry from measurements of a single panoramic 2D LIDAR sensor, a.k.a. a sensor whose field of view is 360 degrees. `fsm_lidom_ros` is the ROS wrapper of [`fsm`](https://github.com/li9i/fsm).
+`fsm_lo` provides LIDAR odometry from measurements of a single panoramic 2D LIDAR sensor, a.k.a. a sensor whose field of view is 360 degrees. `fsm_lo` is the ROS wrapper of [`fsm`](https://github.com/li9i/fsm).
 
 <p align="center">
   <img src="https://i.imgur.com/hUsBImy.png">
@@ -28,7 +28,7 @@ Table of Contents
   * [Launch](#launch)
   * [Call](#call)
 * [Nodes](#nodes)
-  * [`fsm_lidom_node`](#fsm_lidom_node)
+  * [`fsm_lo_node`](#fsm_lo_node)
     * [Subscribed topics](#subscribed-topics)
     * [Published topics](#published-topics)
     * [Services offered](#services-offered)
@@ -47,22 +47,22 @@ Table of Contents
 If this is your first time running docker then I happen to find [this](https://youtu.be/SAMPOK_lazw?t=67) docker installation guide very friendly and easy to follow. Then build the image with the most recent code of this repository using `compose` with
 
 ```sh
-git clone git@github.com:li9i/fsm_lidom_ros.git
-cd fsm_lidom_ros
+git clone git@github.com:li9i/fsm_lo.git
+cd fsm_lo
 docker compose build
 ```
 
 or pull the docker image and run it with
 
 ```sh
-docker pull li9i/fsm_lidom_ros:latest
+docker pull li9i/fsm_lo:latest
 
 docker run -it \
-    --name=fsm_lidom_ros_container \
+    --name=fsm_lo_container \
     --env="DISPLAY=$DISPLAY" \
     --net=host \
     --rm \
-    li9i/fsm_lidom_ros:latest
+    li9i/fsm_lo:latest
 ```
 
 ### Via traditional means
@@ -73,9 +73,9 @@ Tested in Ubuntu 16.04 and ROS kinetic
 
 ```sh
 cd ~/catkin_ws/src
-git clone git@github.com:li9i/fsm_lidom_ros.git
-cd fsm_lidom_ros; mv fsm/* $PWD; rmdir fsm; cd ../..
-catkin build fsm_lidom_ros
+git clone git@github.com:li9i/fsm_lo.git
+cd fsm_lo; mv fsm/* $PWD; rmdir fsm; cd ../..
+catkin build fsm_lo
 ```
 
 ## Run
@@ -92,7 +92,7 @@ docker compose up
 
 
 ```sh
-roslaunch fsm_lidom_ros avanti_fsm_lidom.launch
+roslaunch fsm_lo avanti.launch
 ```
 
 ### Call
@@ -102,19 +102,19 @@ Launching `fsm` simply makes it go into stand-by mode and does not actually exec
 #### Via Docker
 
 ```sh
-docker exec -it fsm_lidom_ros_container sh -c "source ~/catkin_ws/devel/setup.bash; rosservice call /fsm_lidom/start"
+docker exec -it fsm_lo_container sh -c "source ~/catkin_ws/devel/setup.bash; rosservice call /fsm_lo/start"
 ```
 
 #### Via traditional means
 
 ```sh
-rosservice call /fsm_lidom/start
+rosservice call /fsm_lo/start
 ```
 
 
 ## Nodes
 
-### `fsm_lidom_node`
+### `fsm_lo_node`
 
 #### Subscribed topics
 
@@ -130,17 +130,17 @@ rosservice call /fsm_lidom/start
 | --------------------- | ----------------------------| ------------------------------------------------                              |
 | `pose_estimate_topic` | `geometry_msgs/PoseStamped` | the current pose estimate relative to the global frame is published here      |
 | `path_estimate_topic` | `nav_msgs/Path`             | the total estimated trajectory relative to the global frame is published here |
-| `lidom_topic`         | `nav_msgs/Odometry`         | the odometry is published here                                                |
+| `lo_topic`         | `nav_msgs/Odometry`         | the odometry is published here                                                |
 
 
 #### Services offered
 
 | Service                                | Type             | Utility                                                                                                                                          |
 | -------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `fsm_lidom/clear_estimated_trajectory` | `std_srvs/Empty` | clears the vector of estimated poses                                                                                                             |
-| `fsm_lidom/set_initial_pose`           | `std_srvs/Empty` | calling this service means: node subscribes to `initial_pose_topic`, obtains the latest pose estimate, sets fsm's initial pose, and unsubscribes |
-| `fsm_lidom/start`                      | `std_srvs/Empty` | commences node functionality                                                                                                                     |
-| `fsm_lidom/stop`                       | `std_srvs/Empty` | halts node functionality (node remains alive)                                                                                                    |
+| `fsm_lo/clear_estimated_trajectory` | `std_srvs/Empty` | clears the vector of estimated poses                                                                                                             |
+| `fsm_lo/set_initial_pose`           | `std_srvs/Empty` | calling this service means: node subscribes to `initial_pose_topic`, obtains the latest pose estimate, sets fsm's initial pose, and unsubscribes |
+| `fsm_lo/start`                      | `std_srvs/Empty` | commences node functionality                                                                                                                     |
+| `fsm_lo/stop`                       | `std_srvs/Empty` | halts node functionality (node remains alive)                                                                                                    |
 
 
 #### Parameters
@@ -151,15 +151,15 @@ Found in `config/params.yaml`:
 | ------------------------ | ------------------------------------------------------------------- |
 | `scan_topic`             | 2d panoramic scans are published here                               |
 | `initial_pose_topic`     | (optional) the topic where an initial pose estimate may be provided |
-| `pose_estimate_topic`    | `fsm_lidom_ros`'s pose estimates are published here                 |
-| `path_estimate_topic`    | `fsm_lidom_ros`'s total trajectory estimate is published here       |
-| `lidom_topic`            | `fsm_lidom_ros`'s odometry estimate is published here               |
+| `pose_estimate_topic`    | `fsm_lo`'s pose estimates are published here                 |
+| `path_estimate_topic`    | `fsm_lo`'s total trajectory estimate is published here       |
+| `lo_topic`            | `fsm_lo`'s odometry estimate is published here               |
 
 | Frame ids         | Description                                                     |
 | ----------------- | -------------------------------------                           |
 | `global_frame_id` | the global frame id (e.g. `/map`)                               |
 | `base_frame_id`   | the lidar sensor's reference frame id (e.g. `/base_laser_link`) |
-| `lidom_frame_id`  | the (lidar) odometry's frame id                                 |
+| `lo_frame_id`  | the (lidar) odometry's frame id                                 |
 
 | FSM-specific parameters  | Description                                                                                                       |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
@@ -176,11 +176,11 @@ Found in `config/params.yaml`:
 #### Transforms published
 
 ```
-lidom_frame_id <- base_frame_id
+lo_frame_id <- base_frame_id
 ```
 
-in other words `fsm_lidom_node` publishes the transform from `/base_laser_link`
-(or equivalent) to the equivalent of `/odom` (in this case `lidom_frame_id`)
+in other words `fsm_lo_node` publishes the transform from `/base_laser_link`
+(or equivalent) to the equivalent of `/odom` (in this case `lo_frame_id`)
 
 
 ## Motivation and Under the hood

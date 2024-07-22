@@ -1,5 +1,5 @@
-#ifndef FSMLIDOM_H
-#define FSMLIDOM_H
+#ifndef FSMLO_H
+#define FSMLO_H
 
 #include <memory>
 #include <chrono>
@@ -51,8 +51,8 @@ class FSMLO
     // Scan topic subscriber
     ros::Subscriber scan_sub_;
 
-    // LIDOM publisher
-    ros::Publisher lidom_pub_;
+    // LO publisher
+    ros::Publisher lo_pub_;
 
     // Pose estimate publisher
     ros::Publisher pose_estimate_pub_;
@@ -87,7 +87,7 @@ class FSMLO
     std::string path_estimate_topic_;
 
     // The topic where fsm's odometry is published
-    std::string lidom_topic_;
+    std::string lo_topic_;
 
 
     // Params
@@ -140,10 +140,10 @@ class FSMLO
     std::string base_frame_id_;
 
     // Lidar odometry frame name
-    std::string lidom_frame_id_;
+    std::string lo_frame_id_;
 
-    // Transform /map -> /lidom
-    tf2_ros::TransformBroadcaster lidom_tf_;
+    // Transform /map -> /lo
+    tf2_ros::TransformBroadcaster lo_tf_;
 
     // **** methods
 
@@ -157,11 +157,11 @@ class FSMLO
     void initParams();
     void initPSS();
 
-    void publishLIDOM(const std::tuple<double,double,double>& diff);
-    void publishLIDOMMessage(const std::tuple<double,double,double>& diff);
-    void publishLIDOMPathMessage();
-    void publishLIDOMPoseMessage();
-    void publishLIDOMTransform(const std::tuple<double,double,double>& diff);
+    void publishLO(const std::tuple<double,double,double>& diff);
+    void publishLOMessage(const std::tuple<double,double,double>& diff);
+    void publishLOPathMessage();
+    void publishLOPoseMessage();
+    void publishLOTransform(const std::tuple<double,double,double>& diff);
 
     std::vector<double> retypeScan(
       const sensor_msgs::LaserScan::Ptr& scan_msg);
@@ -191,4 +191,4 @@ class FSMLO
 
 };
 
-#endif // FSMLIDOM_H
+#endif // FSMLO_H
