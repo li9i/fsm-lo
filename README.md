@@ -26,7 +26,6 @@ Table of Contents
 * [Run](#run)
   * [Launch](#launch)
   * [Call](#call)
-
 * [Nodes](#nodes)
   * [`fsm_lo_node`](#fsm_lo_node)
     * [Subscribed topics](#subscribed-topics)
@@ -34,10 +33,8 @@ Table of Contents
     * [Services offered](#services-offered)
     * [Parameters](#parameters)
     * [Transforms published](#transforms-published)
-
 * [Motivation and Under the hood](#motivation-and-under-the-hood)
   * [1 min summary video](#1-min-summary-video)
-
   * [IROS 2022 paper](#iros-2022-paper)
 
 
