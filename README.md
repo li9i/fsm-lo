@@ -4,7 +4,7 @@
 [![youtube.com](https://img.shields.io/badge/1'_presentation-YouTube-FF0000)](https://www.youtube.com/watch?v=hB4qsHCEXGI)
 [![github.com](https://img.shields.io/badge/pdf_presentation-333333)](https://github.com/phd-li9i/fsm_presentation_iros22/blob/master/main.pdf)
 
-`fsm_lo` provides LIDAR odometry from measurements of a single panoramic 2D LIDAR sensor, a.k.a. a sensor whose field of view is 360 degrees. `fsm_lo` is the ROS wrapper of [`fsm`](https://github.com/li9i/fsm).
+`fsm_lo` is a ROS package written in C++ that provides LIDAR odometry from measurements of a single panoramic 2D LIDAR sensor, a.k.a. a sensor whose field of view is 360 degrees. `fsm_lo` is the ROS wrapper of [`fsm`](https://github.com/li9i/fsm).
 
 <p align="center">
   <img src="https://i.imgur.com/hUsBImy.png">
@@ -21,12 +21,12 @@ These two pillars support the robustness of FSM's pose error to sensor noise and
 
 Table of Contents
 =================
+* [Pre-installation](#pre-installation)
 * [Installation](#installation)
-  * [Via Docker](#via-docker)
-  * [Via traditional means](#via-traditional-means)
 * [Run](#run)
   * [Launch](#launch)
   * [Call](#call)
+
 * [Nodes](#nodes)
   * [`fsm_lo_node`](#fsm_lo_node)
     * [Subscribed topics](#subscribed-topics)
@@ -34,17 +34,24 @@ Table of Contents
     * [Services offered](#services-offered)
     * [Parameters](#parameters)
     * [Transforms published](#transforms-published)
+
 * [Motivation and Under the hood](#motivation-and-under-the-hood)
   * [1 min summary video](#1-min-summary-video)
+
   * [IROS 2022 paper](#iros-2022-paper)
 
 
 
+## Pre-installation
+
+`fsm-lo` is installed, launched, and called via Docker:
+
+- if this is your first time running docker then I happen to find [this](https://youtu.be/SAMPOK_lazw?t=67) docker installation guide very friendly and easy to follow
+- if instead you wish to install and run the package natively in Ubuntu 16.04, see the [INSTALLATION_DEPRECATED.md](https://github.com/li9i/fsm-lo/blob/master/INSTALLATION_DEPRECATED.md) guide.
+
 ## Installation
 
-### Via Docker
-
-If this is your first time running docker then I happen to find [this](https://youtu.be/SAMPOK_lazw?t=67) docker installation guide very friendly and easy to follow. Then build the image with the most recent code of this repository using `compose` with
+Build the image with the most recent code of this repository using `compose` with
 
 ```sh
 git clone git@github.com:li9i/fsm_lo.git
@@ -65,51 +72,25 @@ docker run -it \
     li9i/fsm_lo:latest
 ```
 
-### Via traditional means
-
-Tested in Ubuntu 16.04 and ROS kinetic
-
-#### Dependencies: `CGAL 4.7` `FFTW3` `boost/random`
-
-```sh
-cd ~/catkin_ws/src
-git clone git@github.com:li9i/fsm_lo.git
-cd fsm_lo; mv fsm/* $PWD; rmdir fsm; cd ../..
-catkin build fsm_lo
-```
+####
 
 ## Run
 
 ### Launch
 
-#### Via Docker
-
 ```sh
 docker compose up
-```
-
-#### Via traditional means
-
-
-```sh
-roslaunch fsm_lo avanti.launch
 ```
 
 ### Call
 
 Launching `fsm` simply makes it go into stand-by mode and does not actually execute anything. To do so simply call the provided service
 
-#### Via Docker
-
 ```sh
 docker exec -it fsm_lo_container sh -c "source ~/catkin_ws/devel/setup.bash; rosservice call /fsm_lo/start"
 ```
 
-#### Via traditional means
 
-```sh
-rosservice call /fsm_lo/start
-```
 
 
 ## Nodes
