@@ -52,7 +52,7 @@ Build the image with the most recent code of this repository using `compose` wit
 
 ```sh
 git clone git@github.com:li9i/fsm-lo.git
-cd fsm_lo
+cd fsm-lo
 docker compose build
 ```
 
