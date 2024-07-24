@@ -59,17 +59,17 @@ docker compose build
 or pull the docker image and run it with
 
 ```sh
-docker pull li9i/fsm_lo:latest
+docker pull li9i/fsm-lo:latest
 
 docker run -it \
     --name=fsm_lo_container \
     --env="DISPLAY=$DISPLAY" \
     --net=host \
     --rm \
-    li9i/fsm_lo:latest
+    li9i/fsm-lo:latest
 ```
 
-####
+
 
 ## Run
 
