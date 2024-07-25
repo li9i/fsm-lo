@@ -1,10 +1,11 @@
+# ------------------------------------------------------------------------------
 # IO Topics
 scan_topic:          "/base_scan"
-initial_pose_topic:  "/amcl_pose"  # optional
+initial_pose_topic:  "/amcl_pose"  # optional, otherwise (0,0,0)
 pose_estimate_topic: "/fsm_lo/pose_estimate"
 path_estimate_topic: "/fsm_lo/path_estimate"
-lo_topic:         "/fsm_lo/lo"
-
+lo_topic:            "/fsm_lo/lo"
+# ------------------------------------------------------------------------------
 # Frames' parameters
 # The fsm_lo_node publishes:
 # (a) The transform between consecutive laser frames in the form of a tf
@@ -12,10 +13,10 @@ lo_topic:         "/fsm_lo/lo"
 # (b) The transform between consecutive laser frames in the form of a message
 # (nav_msgs/Odometry) from `base_frame_id` to `lo_frame_id`, and
 # (c) The current pose estimate with respect to a global frame
-global_frame_id: '/map'
-base_frame_id:   '/base_laser_link'
-lo_frame_id:  '/lo'
-
+global_frame_id: "/map"
+base_frame_id:   "/base_laser_link"
+lo_frame_id:     "/lo"
+# ------------------------------------------------------------------------------
 # FSM parameters
 size_scan:              360
 min_magnification_size: 0
@@ -25,3 +26,4 @@ xy_bound:               0.2
 t_bound:                0.786
 max_counter:            200
 max_recoveries:         10
+# ------------------------------------------------------------------------------

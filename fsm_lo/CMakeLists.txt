@@ -34,7 +34,8 @@ INCLUDE_DIRECTORIES(include
   ${catkin_INCLUDE_DIRS}
   /usr/include/eigen3/)
 
-# sm ###########################################################################
+# ------------------------------------------------------------------------------
+# sm
 add_library(fsm_lo src/fsm.cpp)
 target_link_libraries(fsm_lo
   fftw3
@@ -42,8 +43,8 @@ target_link_libraries(fsm_lo
   ${catkin_LIBRARIES})
 add_dependencies(fsm_lo
   ${catkin_EXPORTED_TARGETS})
-
-# The executable ###############################################################
+# ------------------------------------------------------------------------------
+# The executable
 add_executable(fsm_node
   src/fsm_node.cpp)
 
@@ -54,3 +55,4 @@ target_link_libraries(fsm_node
 add_dependencies(fsm_node
   ${catkin_EXPORTED_TARGETS}
 )
+# ------------------------------------------------------------------------------

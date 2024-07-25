@@ -4,15 +4,13 @@
 [![youtube.com](https://img.shields.io/badge/1'_presentation-YouTube-FF0000)](https://www.youtube.com/watch?v=hB4qsHCEXGI)
 [![github.com](https://img.shields.io/badge/pdf_presentation-333333)](https://github.com/phd-li9i/fsm_presentation_iros22/blob/master/main.pdf)
 
-`fsm_lo` is a ROS package written in C++ that provides LIDAR odometry from measurements of a single panoramic 2D LIDAR sensor, a.k.a. a sensor whose field of view is 360 degrees. `fsm_lo` is the ROS wrapper of [`fsm`](https://github.com/li9i/fsm).
+`fsm_lo` is a ROS package written in C++ that provides LIDAR odometry from measurements of a single panoramic 2D LIDAR sensor, that is: a sensor whose field of view is 360 degrees. `fsm_lo` is the ROS wrapper of [`fsm`](https://github.com/li9i/fsm).
 
 <p align="center">
   <img src="https://i.imgur.com/hUsBImy.png">
 </p>
 
-Lidar odometry is achieved via scan-matching _but without establishing correspondences_ by leveraging the range signal's periodicity.
-Hence FSM may exploit properties of the Discrete Fourier Transform.
-These two pillars support the robustness of FSM's pose error to sensor noise and distance between consecutive poses, as you can see in the figure that summarises key experiments below.
+Lidar odometry is achieved via scan-matching _but without establishing correspondences_ between elements of the input scans or their properties, but by leveraging the range signal's periodicity. Hence FSM may exploit properties of the Discrete Fourier Transform, which it does. These two pillars support the robustness of FSM's pose error against (a) sensor noise and (b) distance between consecutive poses, as you can see in the figure that summarises key experiments below.
 
 ## Why use FSM
 
@@ -44,7 +42,7 @@ Table of Contents
 `fsm-lo` is installed, launched, and called via Docker:
 
 - if this is your first time running docker then I happen to find [this](https://youtu.be/SAMPOK_lazw?t=67) docker installation guide very friendly and easy to follow
-- if instead you wish to install and run the package natively in Ubuntu 16.04, see the [INSTALLATION_DEPRECATED.md](https://github.com/li9i/fsm-lo/blob/master/INSTALLATION_DEPRECATED.md) guide.
+- if instead you wish to install and run the package natively then see the [INSTALLATION_DEPRECATED.md](https://github.com/li9i/fsm-lo/blob/master/INSTALLATION_DEPRECATED.md) guide.
 
 ## Installation
 
@@ -139,16 +137,16 @@ Found in `config/params.yaml`:
 | `base_frame_id`   | the lidar sensor's reference frame id (e.g. `/base_laser_link`) |
 | `lo_frame_id`  | the (lidar) odometry's frame id                                 |
 
-| FSM-specific parameters  | Description                                                                                                       |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `size_scan`              | the size of scans that are matched (execution time is proportional to scan size, hence subsampling may be needed) |
-| `min_magnification_size` | base angular oversampling                                                                                         |
-| `max_magnification_size` | maximum angular oversampling                                                                                      |
-| `num_iterations`         | Greater sensor velocity requires higher values                                                                    |
-| `xy_bound`               | Axiswise radius for randomly generating a new initial position estimate in case of recovery                       |
-| `t_bound`                | Angularwise radius for randomly generating a new initial orientation estimate in case of recovery                 |
-| `max_counter`            | Lower values decrease execution time                                                                              |
-| `max_recoveries`         | Ditto                                                                                                             |
+| FSM-specific parameters  | Description                                                  | Default value |
+| ------------------------ | ------------------------------------------------------------ | :-----------: |
+| `size_scan`              | the size of scans that are matched (execution time is proportional to scan size, hence subsampling may be needed) |      360      |
+| `min_magnification_size` | base angular oversampling                                    |       0       |
+| `max_magnification_size` | maximum angular oversampling                                 |       3       |
+| `num_iterations`         | Greater sensor velocity requires higher values               |       2       |
+| `xy_bound`               | Axis-wise radius for randomly generating a new initial position estimate in case of recovery |      0.2      |
+| `t_bound`                | Angular-wise radius for randomly generating a new initial orientation estimate in case of recovery |      π/4      |
+| `max_counter`            | Lower values decrease execution time                         |      200      |
+| `max_recoveries`         | Ditto                                                        |      10       |
 
 
 #### Transforms published
@@ -173,7 +171,7 @@ in other words `fsm_lo_node` publishes the transform from `/base_laser_link`
 
 ```bibtex
 @INPROCEEDINGS{9981228,
-  author={Filotheou, Alexandros and Sergiadis, Georgios D. and Dimitriou, Antonis G.}
+  author={Filotheou, Alexandros and Sergiadis, Georgios D. and Dimitriou, Antonis G.},
   booktitle={2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
   title={FSM: Correspondenceless scan-matching of panoramic 2D range scans},
   year={2022},
