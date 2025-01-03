@@ -10,15 +10,15 @@
   <img src="https://i.imgur.com/hUsBImy.png">
 </p>
 
-Lidar odometry is achieved via scan-matching _but without establishing correspondences_ between elements of the input scans or their properties, but by leveraging the range signal's periodicity. Hence FSM may exploit properties of the Discrete Fourier Transform, which it does. These two pillars support the robustness of FSM's pose error against (a) sensor noise and (b) distance between consecutive poses, as you can see in the figure that summarises key experiments below.
+Lidar odometry is achieved via scan-matching _but without establishing correspondences_ between elements of the input scans or their properties, but by leveraging the range signal's periodicity. Hence FSM may exploit properties of the Discrete Fourier Transform. These two pillars support the robustness of FSM's pose error against (a) sensor noise and (b) distance between consecutive poses, as exhibited in the figure which summarises key experiments below.
 
 ## Why use FSM
 
 ![Experimental results at a glance](https://i.imgur.com/GvFlHgF.png)
 
-
 Table of Contents
 =================
+
 * [Pre-installation](#pre-installation)
 * [Installation](#installation)
 * [Run](#run)
@@ -35,8 +35,6 @@ Table of Contents
   * [1 min summary video](#1-min-summary-video)
   * [IROS 2022 paper](#iros-2022-paper)
 
-
-
 ## Pre-installation
 
 `fsm-lo` is installed, launched, and called via Docker:
@@ -48,45 +46,46 @@ Table of Contents
 
 Build the image with the most recent code of this repository using `compose` with
 
-```sh
+```bash
 git clone git@github.com:li9i/fsm-lo.git
 cd fsm-lo
 docker compose build
 ```
 
-or pull the docker image and run it with
+or pull it:
 
-```sh
+```bash
 docker pull li9i/fsm-lo:latest
-
-docker run -it \
-    --name=fsm_lo_container \
-    --env="DISPLAY=$DISPLAY" \
-    --net=host \
-    --rm \
-    li9i/fsm-lo:latest
 ```
-
-
 
 ## Run
 
 ### Launch
 
-```sh
+If you cloned the repository then you may run the image via `compose`
+
+```bash
+cd fsm-lo
 docker compose up
+```
+
+or, in any case, you may run the image with
+
+```bash
+docker run -it \
+    --name=fsm_lo_container \
+    --net=host \
+    --rm \
+    li9i/fsm-lo:latest
 ```
 
 ### Call
 
 Launching `fsm` simply makes it go into stand-by mode and does not actually execute anything. To do so simply call the provided service
 
-```sh
+```bash
 docker exec -it fsm_lo_container sh -c "source ~/catkin_ws/devel/setup.bash; rosservice call /fsm_lo/start"
 ```
-
-
-
 
 ## Nodes
 
@@ -94,60 +93,56 @@ docker exec -it fsm_lo_container sh -c "source ~/catkin_ws/devel/setup.bash; ros
 
 #### Subscribed topics
 
-| Topic                | Type                                     | Utility                                                                                |
-| -------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------|
-| `scan_topic`         | `sensor_msgs/LaserScan`                  | 2d panoramic scans are published here                                                  |
-| `initial_pose_topic` | `geometry_msgs/PoseWithCovarianceStamped`| optional---for setting the very first pose estimate to something other than the origin |
-
+| Topic                | Type                                      | Utility                                                                                |
+| -------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------- |
+| `scan_topic`         | `sensor_msgs/LaserScan`                   | 2d panoramic scans are published here                                                  |
+| `initial_pose_topic` | `geometry_msgs/PoseWithCovarianceStamped` | optional---for setting the very first pose estimate to something other than the origin |
 
 #### Published topics
 
 | Topic                 | Type                        | Utility                                                                       |
-| --------------------- | ----------------------------| ------------------------------------------------                              |
+| --------------------- | --------------------------- | ----------------------------------------------------------------------------- |
 | `pose_estimate_topic` | `geometry_msgs/PoseStamped` | the current pose estimate relative to the global frame is published here      |
 | `path_estimate_topic` | `nav_msgs/Path`             | the total estimated trajectory relative to the global frame is published here |
-| `lo_topic`         | `nav_msgs/Odometry`         | the odometry is published here                                                |
-
+| `lo_topic`            | `nav_msgs/Odometry`         | the odometry is published here                                                |
 
 #### Services offered
 
-| Service                                | Type             | Utility                                                                                                                                          |
-| -------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Service                             | Type             | Utility                                                                                                                                          |
+| ----------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `fsm_lo/clear_estimated_trajectory` | `std_srvs/Empty` | clears the vector of estimated poses                                                                                                             |
 | `fsm_lo/set_initial_pose`           | `std_srvs/Empty` | calling this service means: node subscribes to `initial_pose_topic`, obtains the latest pose estimate, sets fsm's initial pose, and unsubscribes |
 | `fsm_lo/start`                      | `std_srvs/Empty` | commences node functionality                                                                                                                     |
 | `fsm_lo/stop`                       | `std_srvs/Empty` | halts node functionality (node remains alive)                                                                                                    |
 
-
 #### Parameters
 
 Found in `config/params.yaml`:
 
-| IO Topics                | Description                                                         |
-| ------------------------ | ------------------------------------------------------------------- |
-| `scan_topic`             | 2d panoramic scans are published here                               |
-| `initial_pose_topic`     | (optional) the topic where an initial pose estimate may be provided |
-| `pose_estimate_topic`    | `fsm_lo`'s pose estimates are published here                 |
-| `path_estimate_topic`    | `fsm_lo`'s total trajectory estimate is published here       |
-| `lo_topic`            | `fsm_lo`'s odometry estimate is published here               |
+| IO Topics             | Description                                                         |
+| --------------------- | ------------------------------------------------------------------- |
+| `scan_topic`          | 2d panoramic scans are published here                               |
+| `initial_pose_topic`  | (optional) the topic where an initial pose estimate may be provided |
+| `pose_estimate_topic` | `fsm_lo`'s pose estimates are published here                        |
+| `path_estimate_topic` | `fsm_lo`'s total trajectory estimate is published here              |
+| `lo_topic`            | `fsm_lo`'s odometry estimate is published here                      |
 
 | Frame ids         | Description                                                     |
-| ----------------- | -------------------------------------                           |
+| ----------------- | --------------------------------------------------------------- |
 | `global_frame_id` | the global frame id (e.g. `/map`)                               |
 | `base_frame_id`   | the lidar sensor's reference frame id (e.g. `/base_laser_link`) |
-| `lo_frame_id`  | the (lidar) odometry's frame id                                 |
+| `lo_frame_id`     | the (lidar) odometry's frame id                                 |
 
-| FSM-specific parameters  | Description                                                  | Default value |
-| ------------------------ | ------------------------------------------------------------ | :-----------: |
-| `size_scan`              | the size of scans that are matched (execution time is proportional to scan size, hence subsampling may be needed) |      360      |
-| `min_magnification_size` | base angular oversampling                                    |       0       |
-| `max_magnification_size` | maximum angular oversampling                                 |       3       |
-| `num_iterations`         | Greater sensor velocity requires higher values               |       2       |
-| `xy_bound`               | Axis-wise radius for randomly generating a new initial position estimate in case of recovery |      0.2      |
-| `t_bound`                | Angular-wise radius for randomly generating a new initial orientation estimate in case of recovery |      π/4      |
-| `max_counter`            | Lower values decrease execution time                         |      200      |
-| `max_recoveries`         | Ditto                                                        |      10       |
-
+| FSM-specific parameters  | Description                                                                                                       | Default value |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |:-------------:|
+| `size_scan`              | the size of scans that are matched (execution time is proportional to scan size, hence subsampling may be needed) | 360           |
+| `min_magnification_size` | base angular oversampling                                                                                         | 0             |
+| `max_magnification_size` | maximum angular oversampling                                                                                      | 3             |
+| `num_iterations`         | Greater sensor velocity requires higher values                                                                    | 2             |
+| `xy_bound`               | Axis-wise radius for randomly generating a new initial position estimate in case of recovery                      | 0.2           |
+| `t_bound`                | Angular-wise radius for randomly generating a new initial orientation estimate in case of recovery                | π/4           |
+| `max_counter`            | Lower values decrease execution time                                                                              | 200           |
+| `max_recoveries`         | Ditto                                                                                                             | 10            |
 
 #### Transforms published
 
@@ -158,18 +153,19 @@ lo_frame_id <- base_frame_id
 in other words `fsm_lo_node` publishes the transform from `/base_laser_link`
 (or equivalent) to the equivalent of `/odom` (in this case `lo_frame_id`)
 
-
 ## Motivation and Under the hood
 
 ### 1 min summary video
+
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/hB4qsHCEXGI/0.jpg)](http://www.youtube.com/watch?v=hB4qsHCEXGI "1 min summary video")
 
 <!-- ### IROS 2022 presentation slides -->
+
 <!-- [PDF link](https://raw.githubusercontent.com/li9i/fsm_presentation_iros22/master/main.pdf) -->
 
 ### IROS 2022 paper
 
-```bibtex
+```latex
 @INPROCEEDINGS{9981228,
   author={Filotheou, Alexandros and Sergiadis, Georgios D. and Dimitriou, Antonis G.},
   booktitle={2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
@@ -177,3 +173,4 @@ in other words `fsm_lo_node` publishes the transform from `/base_laser_link`
   year={2022},
   pages={6968-6975},
   doi={10.1109/IROS47612.2022.9981228}}
+```
