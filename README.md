@@ -165,7 +165,7 @@ in other words `fsm_lo_node` publishes the transform from `/base_laser_link`
 
 ### IROS 2022 paper
 
-```latex
+```bibtex
 @INPROCEEDINGS{9981228,
   author={Filotheou, Alexandros and Sergiadis, Georgios D. and Dimitriou, Antonis G.},
   booktitle={2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
